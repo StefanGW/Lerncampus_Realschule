@@ -167,6 +167,7 @@ svg.fig{width:min(100%,430px);height:auto;margin:6px 0 14px;display:block;backgr
 table.tb{border-collapse:collapse;margin:8px 0;font-size:1.1rem}
 table.tb th,table.tb td{border:2px solid rgba(255,255,255,.25);padding:6px 16px;text-align:center;color:#fff}
 table.tb th{background:rgba(255,255,255,.12)}
+@media(max-width:600px){table.tb th,table.tb td{padding:5px 6px;font-size:.95rem}}
 
 /* Overlay */
 #overlay{position:fixed;inset:0;display:none;place-items:center;background:rgba(6,2,28,.78);z-index:50;padding:16px;overflow:auto}
@@ -2583,6 +2584,1381 @@ TOPICS.push(
 );
 
 
+const G5_PLACE_IMG = {}, G5_ISLAND_IMG = {};
+{
+/* ===== Inhaltspaket 5. Klasse Realschule (LehrplanPLUS Bayern) ===== */
+/* Insel anlegen: places = [[id, Name, Ortsname, Symbol, vorhandenes Ortsbild], ...] */
+function isl5(subject, id, num, name, island, emoji, c1, c2, img, places) {
+  LBS.push({id, subject, grade: 5, num, name, island, emoji, c1, c2, boss: {name: island.replace('-Insel', '-Boss'), emoji, minutes: 5, xp: 30}});
+  G5_ISLAND_IMG[id] = img;
+  places.forEach(p => { TOPICS.push({id: p[0], lb: id, name: p[1], place: p[2], emoji: p[3]}); G5_PLACE_IMG[p[0]] = p[4]; });
+}
+const lines5 = s => s.trim().split('\n').map(l => l.trim()).filter(Boolean);
+/* Wissensfragen: Frage|richtig|falsch;falsch;falsch|Erklärung|* (* = auf Schwer selbst schreiben, danach weitere Schreibweisen) */
+function pool5(id, tip, src) {
+  const items = lines5(src).map(l => { const [q, ok, bad, ex, kw] = l.split('|'); return [q, ok, bad.split(';'), ex || '', !!kw, kw ? kw.slice(1).split(';').filter(Boolean) : []]; });
+  GEN[id] = diff => { const t = gpool(id, diff, items, tip); t.key += '|' + t.sol.v; return t; };
+}
+/* Lückensätze: Satz|richtig|falsch;falsch;falsch|Tipp|weitere richtige Antworten */
+function gap5(id, instr, src, first) {
+  const items = lines5(src).map(l => { const [t, ok, bad, tip, alts] = l.split('|'); return {t, ok, bad: bad.split(';'), tip: tip || 'Lies den ganzen Satz und achte auf die Wörter rund um die Lücke.', alts: alts ? alts.split(';') : []}; });
+  /* first: Bei Funktionswörtern gibt es auch auf Schwer den Anfangsbuchstaben, damit nur eine Lösung passt */
+  GEN[id] = diff => { const task = poolGen(id, diff, items, instr); if (first && diff === 2) task.text += `<br><small>Anfangsbuchstabe: <b>${task.sol.v[0]}</b></small>`; return task; };
+}
+/* Wortschatz: englisch=deutsch;... */
+function voc5(id, src) { const list = src.trim().split(/\s*;\s*/).filter(Boolean).map(x => x.split('=')); GEN[id] = diff => vocGen(id, diff, list); }
+
+/* --- Mathematik 5 --- */
+isl5('mathe', 'k5m1', 1, 'Natürliche Zahlen', 'Zahlen-Insel', '🔢', '#27d6a3', '#0a8f86', 'lb1', [
+  ['k5_stellen', 'Stellenwerte und große Zahlen', 'Stellenwert-Strand', '🔢', 'dezimal'],
+  ['k5_strahl', 'Zahlenstrahl und Vergleichen', 'Strahl-Steg', '📏', 'zahlengerade'],
+  ['k5_runden', 'Natürliche Zahlen runden', 'Runde Ruine', '🗿', 'runden'],
+  ['k5_systeme', 'Römische Zahlen und Zweiersystem', 'Römer-Riff', '🏛️', 'g_zeit'],
+  ['k5_plusminus', 'Schriftlich addieren und subtrahieren', 'Plus-Pier', '➕', 'addsub'],
+  ['k5_malteil', 'Multiplizieren und dividieren', 'Mal-Mühle', '✖️', 'mal'],
+  ['k5_regeln', 'Rechenregeln und Rechengesetze', 'Regel-Ranch', '📜', 'termwert'],
+  ['k5_potenz', 'Potenzen und Quadratzahlen', 'Potenz-Gipfel', '🚀', 'gemischt'],
+  ['k5_teilbar', 'Teilbarkeit und Primzahlen', 'Teiler-Tal', '🔍', 'durch'],
+  ['k5_ggt', 'ggT und kgV', 'Gemeinsam-Grotte', '🤝', 'kuerzen'],
+  ['k5_kombi', 'Kombinieren und Zählen', 'Kombi-Camp', '🧩', 'zusammen']
+]);
+isl5('mathe', 'k5m2', 2, 'Ganze Zahlen', 'Minus-Insel', '🌡️', '#b36bff', '#5a2fcf', 'lb2', [
+  ['k5_gz_ordnen', 'Ganze Zahlen ordnen, Betrag und Gegenzahl', 'Frost-Fjord', '❄️', 'vergleichen'],
+  ['k5_gz_plus', 'Ganze Zahlen addieren und subtrahieren', 'Thermometer-Turm', '🌡️', 'raumeinheiten'],
+  ['k5_gz_mal', 'Ganze Zahlen multiplizieren und dividieren', 'Vorzeichen-Vulkan', '🌋', 'vergleichen'],
+  ['k5_gz_sach', 'Verbundene Rechnungen und Alltag', 'Alltags-Alm', '🏔️', 'sach']
+]);
+isl5('mathe', 'k5m3', 3, 'Geometrische Grundbegriffe', 'Formen-Insel', '📐', '#ffb347', '#e0602a', 'lb3', [
+  ['k5_begriffe', 'Punkt, Strecke, Gerade und Kreis', 'Linien-Lichtung', '📍', 'spiegeln'],
+  ['k5_figuren', 'Dreiecke und Vierecke', 'Vierecks-Dünen', '🔷', 'flaeche_para'],
+  ['k5_koord', 'Koordinatensystem', 'Koordinaten-Garten', '🎯', 'spiegeln'],
+  ['k5_winkel', 'Winkel', 'Winkel-Werft', '📐', 'flaeche_trapez'],
+  ['k5_koerper', 'Geometrische Körper', 'Körper-Küste', '🧊', 'wuerfel_v'],
+  ['k5_netze', 'Netze, Schrägbilder und Kopfgeometrie', 'Falt-Fabrik', '📦', 'oberflaeche']
+]);
+isl5('mathe', 'k5m4', 4, 'Größen', 'Maß-Insel', '⚖️', '#4fd5ff', '#2468d8', 'lb4', [
+  ['k5_geld', 'Geld', 'Münz-Mine', '💶', 'prozent_sach'],
+  ['k5_masse', 'Masse', 'Waagen-Wiese', '⚖️', 'gleichung'],
+  ['k5_laenge', 'Länge', 'Meter-Mole', '📏', 'groessen'],
+  ['k5_zeit', 'Zeit', 'Uhren-Ufer', '⏰', 'g_zeit'],
+  ['k5_hohlmass', 'Flüssigkeitsmaße', 'Liter-Lager', '🧪', 'raumeinheiten'],
+  ['k5_massstab', 'Maßstab', 'Karten-Kap', '🗺️', 'o_massstab'],
+  ['k5_dreisatz', 'Dreisatz', 'Dreisatz-Düne', '🏜️', 'dreisatz']
+]);
+isl5('mathe', 'k5m5', 5, 'Umfang und Flächeninhalt', 'Flächen-Insel', '🟩', '#ff6fb5', '#c4227a', 'lb5', [
+  ['k5_umfang', 'Umfang von Rechteck, Quadrat und Vielecken', 'Zaun-Zentrum', '🚧', 'flaeche_drachen'],
+  ['k5_flaeche', 'Flächeninhalt von Rechteck und Quadrat', 'Feld-Farm', '🟩', 'flaecheneinheiten'],
+  ['k5_feinheit', 'Flächeneinheiten', 'Einheiten-Eck', '🗺️', 'flaecheneinheiten'],
+  ['k5_fzusammen', 'Zusammengesetzte Flächen', 'Puzzle-Plateau', '🧩', 'zusammen']
+]);
+isl5('mathe', 'k5m6', 6, 'Auswertung von Daten', 'Daten-Insel', '📊', '#9bef4a', '#2f9e44', 'lb6', [
+  ['k5_tabellen', 'Strichlisten und Tabellen', 'Strichlisten-Station', '📋', 'proportional'],
+  ['k5_diagramme', 'Diagramme lesen und prüfen', 'Säulen-Siedlung', '📊', 'koerper_zus']
+]);
+
+const de5 = n => n.toLocaleString('de-DE');
+const num5 = (topic, diff, key, text, v, tips, explain, extra) => T(topic, diff, key, 'int', text, {v}, tips, explain, Object.assign({meta: {}}, extra));
+/* ganze Zahlen, auch negative */
+const sg5 = n => n < 0 ? '−' + Math.abs(n) : String(n);
+const par5 = n => n < 0 ? `(${sg5(n)})` : String(n);
+const neg5 = (topic, diff, key, text, v, tips, explain) => num5(topic, diff, key, text + '<br><small>Negative Zahlen mit Minuszeichen eingeben.</small>', v, tips, explain, {meta: {neg: true}});
+const pickMC = (topic, diff, key, text, ok, bad, tips, explain, extra) => MCX(topic, diff, key, text, String(ok), bad.map(String), tips, explain, extra);
+
+function roman5(n) { let s = ''; [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']].forEach(([v, r]) => { while (n >= v) { s += r; n -= v; } }); return s; }
+
+function rect5(a, b, unit) {
+  const s = Math.min(250 / a, 130 / b), w = a * s, h = b * s, x = 45, y = 30;
+  return fig(340, 200, poly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]]) + tx(x + w / 2, y + h + 24, `${a} ${unit}`) + tx(x + w + 8, y + h / 2, `${b} ${unit}`, 'start'));
+}
+function coord5(px, py) {
+  const X = v => 36 + v * 28, Y = v => 256 - v * 28; let s = '';
+  for (let i = 0; i <= 8; i++) s += `<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(8)}" stroke="rgba(255,255,255,.22)"/><line x1="${X(0)}" y1="${Y(i)}" x2="${X(8)}" y2="${Y(i)}" stroke="rgba(255,255,255,.22)"/>` + tx(X(i), 276, String(i)) + (i ? tx(18, Y(i) + 5, String(i)) : '');
+  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(8.4)}" y2="${Y(0)}" class="gx"/><line x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(8.4)}" class="gx"/>` + tx(X(8.4) + 8, Y(0) - 4, 'x') + tx(X(0) + 10, Y(8.4) + 4, 'y');
+  s += `<circle cx="${X(px)}" cy="${Y(py)}" r="7" fill="#ff3fd0" stroke="#fff" stroke-width="2"/>` + tx(X(px) + 14, Y(py) - 8, 'P');
+  return `<svg viewBox="0 0 290 285" class="fig" style="max-width:360px" role="img" aria-label="Koordinatensystem">${s}</svg>`;
+}
+function angle5(deg) {
+  const cx = 170, cy = 140, r = 120, a = deg * Math.PI / 180, big = deg > 180 ? 1 : 0;
+  const ex = cx + r * Math.cos(a), ey = cy - r * Math.sin(a);
+  return `<svg viewBox="0 0 340 280" class="fig" style="max-width:360px" role="img" aria-label="Winkel"><line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" class="gx"/><line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" class="gx"/><path d="M ${cx + 42} ${cy} A 42 42 0 ${big} 0 ${(cx + 42 * Math.cos(a)).toFixed(1)} ${(cy - 42 * Math.sin(a)).toFixed(1)}" fill="none" stroke="#ffe12e" stroke-width="4"/><circle cx="${cx}" cy="${cy}" r="4" fill="#fff"/></svg>`;
+}
+function bars5(names, vals) {
+  const max = 20; let s = '';
+  for (let v = 0; v <= max; v += 5) { const y = 200 - v * 8; s += `<line x1="36" y1="${y}" x2="340" y2="${y}" stroke="rgba(255,255,255,.22)"/>` + tx(22, y + 5, String(v)); }
+  vals.forEach((v, i) => { const x = 56 + i * 72; s += `<rect x="${x}" y="${200 - v * 8}" width="40" height="${v * 8}" fill="#37e6ff"/>` + tx(x + 20, 222, names[i]) + tx(x + 20, 193 - v * 8, String(v)); });
+  return `<svg viewBox="0 0 350 232" class="fig" role="img" aria-label="Säulendiagramm">${s}</svg>`;
+}
+/* Größen umrechnen: [große Einheit, kleine Einheit, Faktor] */
+function unit5(topic, diff, units, tip) {
+  const [G, K, f] = pick(units);
+  if (diff === 0) { const n = rnd(2, 30); return num5(topic, 0, `u0-${G}-${K}-${n}`, `Wandle um: <b>${n} ${G} = ? ${K}</b>`, n * f, [`1 ${G} = ${de5(f)} ${K}.`, `Rechne ${n} · ${de5(f)}.`], `1 ${G} = ${de5(f)} ${K}, also ${n} · ${de5(f)} = <b>${de5(n * f)} ${K}</b>.`, {meta: {term: `${n}*${f}`}}); }
+  if (diff === 1) { const n = rnd(2, 60); return num5(topic, 1, `u1-${G}-${K}-${n}`, `Wandle um: <b>${de5(n * f)} ${K} = ? ${G}</b>`, n, [`${de5(f)} ${K} sind 1 ${G}.`, `Teile durch ${de5(f)}.`], `${de5(n * f)} : ${de5(f)} = <b>${n} ${G}</b>.`, {meta: {term: `${n * f}/${f}`}}); }
+  const n = rnd(1, 20), r = rnd(1, f - 1);
+  return num5(topic, 2, `u2-${G}-${K}-${n}-${r}`, `Gib in ${K} an: <b>${n} ${G} ${r} ${K}</b>`, n * f + r, [`Wandle zuerst ${n} ${G} in ${K} um (1 ${G} = ${de5(f)} ${K}).`, `Zähle danach die ${r} ${K} dazu.`], `${n} · ${de5(f)} + ${r} = <b>${de5(n * f + r)} ${K}</b>.`, {meta: {term: `${n}*${f}+${r}`}}); }
+
+Object.assign(GEN, {
+  k5_stellen(d) {
+    const names = ['Einer', 'Zehner', 'Hunderter', 'Tausender', 'Zehntausender', 'Hunderttausender'];
+    if (d === 0) { const n = rnd(1000, 99999), s = String(n), i = rnd(0, s.length - 1), v = Number(s[s.length - 1 - i]);
+      return num5('k5_stellen', 0, `st0-${n}-${i}`, `Welche Ziffer steht in <b>${de5(n)}</b> an der <b>${names[i]}</b>-Stelle?`, v, ['Zähle die Stellen von rechts: Einer, Zehner, Hunderter, Tausender …', `Gesucht ist die ${i + 1}. Stelle von rechts.`], `Von rechts gezählt steht an der ${names[i]}-Stelle die <b>${v}</b>.`); }
+    if (d === 1) { const z = [rnd(1, 9), rnd(0, 9), rnd(0, 9), rnd(0, 9), rnd(1, 9)], f = [10000, 1000, 100, 10, 1], n = z.reduce((a, x, i) => a + x * f[i], 0), lab = ['ZT', 'T', 'H', 'Z', 'E'];
+      const txt = z.map((x, i) => x ? `${x} ${lab[i]}` : '').filter(Boolean).join(' + ');
+      return num5('k5_stellen', 1, `st1-${n}`, `Schreibe als Zahl: <b>${txt}</b>`, n, ['ZT = Zehntausender, T = Tausender, H = Hunderter, Z = Zehner, E = Einer.', 'Fehlt eine Stelle, schreibst du dort eine 0.'], `Die Zahl heißt <b>${de5(n)}</b>.`, {meta: {term: z.map((x, i) => `${x}*${f[i]}`).join('+')}}); }
+    const a = rnd(2, 900), b = rnd(1, 999), n = a * 1000 + b;
+    return num5('k5_stellen', 2, `st2-${n}`, `Schreibe in Ziffern: <b>${a} Tausend ${b}</b>`, n, ['Tausend bedeutet drei Stellen nach hinten.', 'Hinter den Tausendern stehen immer genau drei Ziffern.'], `${a} · 1.000 + ${b} = <b>${de5(n)}</b>.`, {meta: {term: `${a}*1000+${b}`}});
+  },
+  k5_strahl(d) {
+    if (d === 0) { const a = rnd(100, 99999), b = Math.random() < .5 ? a + rnd(1, 90) : a - rnd(1, 90), ok = a < b ? '<' : '>';
+      return T('k5_strahl', 0, `za0-${a}-${b}`, 'choice', `Welches Zeichen passt?<br><b>${de5(a)} ☐ ${de5(b)}</b>`, {v: ok}, ['Vergleiche von links nach rechts Stelle für Stelle.', 'Das Zeichen öffnet sich zur größeren Zahl.'], `Richtig ist <b>${de5(a)} ${ok === '<' ? '&lt;' : '&gt;'} ${de5(b)}</b>.`, {options: ['<', '=', '>'], meta: {cmp: a - b}}); }
+    if (d === 1) { const step = pick([2, 5, 10, 20, 50, 100]), s = rnd(0, 20) * step, k = rnd(2, 7);
+      return num5('k5_strahl', 1, `za1-${s}-${step}-${k}`, `Auf einem Zahlenstrahl ist jeder Strich <b>${step}</b> mehr als der vorige. Der erste Strich steht bei <b>${s}</b>.<br>Welche Zahl steht <b>${k} Striche</b> weiter rechts?`, s + k * step, [`Gehe ${k} Mal um ${step} weiter.`, `Rechne ${s} + ${k} · ${step}.`], `${s} + ${k} · ${step} = <b>${s + k * step}</b>.`, {meta: {term: `${s}+${k}*${step}`}}); }
+    const a = rnd(5, 400) * 2, diff = rnd(3, 90) * 2, b = a + diff;
+    return num5('k5_strahl', 2, `za2-${a}-${b}`, `Welche Zahl liegt auf dem Zahlenstrahl genau in der Mitte zwischen <b>${a}</b> und <b>${b}</b>?`, a + diff / 2, ['Berechne zuerst den Abstand der beiden Zahlen.', 'Addiere die Hälfte des Abstands zur kleineren Zahl.'], `Abstand ${diff}, die Hälfte ist ${diff / 2}. ${a} + ${diff / 2} = <b>${a + diff / 2}</b>.`, {meta: {term: `(${a}+${b})/2`}});
+  },
+  k5_runden(d) {
+    const places = [[[10, 'Zehner'], [100, 'Hunderter']], [[100, 'Hunderter'], [1000, 'Tausender']], [[1000, 'Tausender'], [10000, 'Zehntausender']]][d], [p, nm] = pick(places), n = rnd(p * 2, p * [40, 60, 90][d]);
+    const r = Math.round(n / p) * p;
+    return num5('k5_runden', d, `ru-${n}-${p}`, `Runde <b>${de5(n)}</b> auf <b>${nm}</b>.`, r, ['Schau dir die Ziffer rechts von der Rundungsstelle an.', 'Bei 0 bis 4 wird abgerundet, bei 5 bis 9 aufgerundet.'], `Entscheidend ist die Ziffer rechts neben der ${nm}-Stelle. Ergebnis: <b>${de5(r)}</b>.`, {meta: {term: `Math.floor((${n}+${p / 2})/${p})*${p}`}});
+  },
+  k5_systeme(d) {
+    const tip = ['I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000.', 'Steht ein kleineres Zeichen vor einem größeren, wird es abgezogen (IV = 4).'];
+    if (d === 0) { const n = rnd(2, 39); return num5('k5_systeme', 0, `ro0-${n}`, `Welche Zahl ist <b>${roman5(n)}</b>?`, n, tip, `${roman5(n)} = <b>${n}</b>.`); }
+    if (d === 1) { const n = rnd(4, 399), ok = roman5(n); return TXT('k5_systeme', 1, `ro1-${n}`, `Schreibe <b>${n}</b> als römische Zahl.`, ok, [], tip, `${n} = <b>${ok}</b>.`); }
+    const n = rnd(2, 31), b = n.toString(2), val = b.split('').map((x, i) => x === '1' ? 2 ** (b.length - 1 - i) : 0).filter(Boolean).join(' + ');
+    if (rnd(0, 1)) return num5('k5_systeme', 2, `bi-${n}`, `Welche Zahl im Zehnersystem ist die Zweiersystem-Zahl <b>(${b})₂</b>?`, n, ['Die Stellenwerte von rechts sind 1, 2, 4, 8, 16.', 'Addiere die Stellenwerte, an denen eine 1 steht.'], `${val} = <b>${n}</b>.`);
+    return TXT('k5_systeme', 2, `bin-${n}`, `Schreibe <b>${n}</b> im Zweiersystem (nur 0 und 1).`, b, [], ['Die Stellenwerte sind 16, 8, 4, 2, 1.', 'Beginne mit dem größten Stellenwert, der hineinpasst.'], `${n} = ${val}, also <b>${b}</b>.`);
+  },
+  k5_plusminus(d) {
+    const r = [[100, 899], [1000, 8999], [10000, 89999]][d], a = rnd(r[0], r[1]), b = rnd(r[0], r[1]);
+    if (rnd(0, 1)) return num5('k5_plusminus', d, `pm-p${a}-${b}`, `Berechne: <b>${de5(a)} + ${de5(b)}</b>`, a + b, ['Schreibe die Zahlen stellengerecht untereinander.', 'Rechne von rechts und denke an die Überträge.'], `${de5(a)} + ${de5(b)} = <b>${de5(a + b)}</b>.`, {meta: {term: `${a}+${b}`}});
+    const x = Math.max(a, b) + rnd(1, 50), y = Math.min(a, b);
+    return num5('k5_plusminus', d, `pm-m${x}-${y}`, `Berechne: <b>${de5(x)} − ${de5(y)}</b>`, x - y, ['Schreibe die Zahlen stellengerecht untereinander.', 'Probe: Ergebnis plus abgezogene Zahl ergibt die erste Zahl.'], `${de5(x)} − ${de5(y)} = <b>${de5(x - y)}</b>.`, {meta: {term: `${x}-${y}`}});
+  },
+  k5_malteil(d) {
+    const a = d === 0 ? rnd(11, 99) : d === 1 ? rnd(101, 999) : rnd(102, 999), b = d === 0 ? rnd(3, 9) : d === 1 ? rnd(3, 12) : rnd(13, 49);
+    if (rnd(0, 1)) return num5('k5_malteil', d, `mt-m${a}-${b}`, `Berechne: <b>${a} · ${b}</b>`, a * b, ['Zerlege eine Zahl in Zehner und Einer.', `Rechne ${a} · ${b >= 10 ? Math.floor(b / 10) * 10 + ' und ' + a + ' · ' + b % 10 : b}.`], `${a} · ${b} = <b>${de5(a * b)}</b>.`, {meta: {term: `${a}*${b}`}});
+    return num5('k5_malteil', d, `mt-d${a}-${b}`, `Berechne: <b>${de5(a * b)} : ${b}</b>`, a, ['Teile von links nach rechts, Stelle für Stelle.', `Probe: Ergebnis · ${b} muss ${de5(a * b)} ergeben.`], `${de5(a * b)} : ${b} = <b>${a}</b>, denn ${a} · ${b} = ${de5(a * b)}.`, {meta: {term: `${a * b}/${b}`}});
+  },
+  k5_regeln(d) {
+    const a = rnd(2, 20), b = rnd(2, 9), c = rnd(2, 9), e = rnd(2, 12);
+    let txt, v, term, hint;
+    if (d === 0) { if (rnd(0, 1)) { txt = `${a} + ${b} · ${c}`; v = a + b * c; term = `${a}+${b}*${c}`; hint = 'Punkt vor Strich.'; } else { txt = `(${a} + ${b}) · ${c}`; v = (a + b) * c; term = `(${a}+${b})*${c}`; hint = 'Klammern zuerst.'; } }
+    else if (d === 1) { if (rnd(0, 1)) { txt = `${b} · ${c} + ${e} · ${b}`; v = b * c + e * b; term = `${b}*${c}+${e}*${b}`; hint = `Du kannst ${b} ausklammern: ${b} · (${c} + ${e}).`; } else { const q = rnd(3, 12); txt = `${a + 40} − ${q * c} : ${c}`; v = a + 40 - q; term = `${a + 40}-${q * c}/${c}`; hint = 'Punkt vor Strich, dann subtrahieren.'; } }
+    else { if (rnd(0, 1)) { txt = `${c} · [${a + 20} − (${b} + ${e})]`; v = c * (a + 20 - (b + e)); term = `${c}*(${a + 20}-(${b}+${e}))`; hint = 'Rechne die innere Klammer zuerst.'; } else { const p = pick([[25, 4], [50, 2], [125, 8], [20, 5]]); txt = `${p[0]} · ${a} · ${p[1]}`; v = p[0] * a * p[1]; term = `${p[0]}*${a}*${p[1]}`; hint = `Vertausche geschickt: ${p[0]} · ${p[1]} · ${a}.`; } }
+    return num5('k5_regeln', d, `rg-${txt}`, `Berechne: <b>${txt}</b>`, v, [hint, 'Reihenfolge: Klammern, dann Punkt, dann Strich, sonst von links nach rechts.'], `${hint} Ergebnis: <b>${de5(v)}</b>.`, {meta: {term}});
+  },
+  k5_potenz(d) {
+    if (d === 0) { const a = rnd(2, 20); return num5('k5_potenz', 0, `po0-${a}`, `Berechne die Quadratzahl: <b>${a}²</b>`, a * a, [`${a}² bedeutet ${a} · ${a}.`, 'Die Hochzahl 2 heißt nicht „mal 2“.'], `${a}² = ${a} · ${a} = <b>${a * a}</b>.`, {meta: {term: `${a}*${a}`}}); }
+    if (d === 1) { const [b, e] = pick([[2, 3], [2, 4], [2, 5], [2, 6], [3, 3], [3, 4], [4, 3], [5, 3], [10, 3], [10, 4], [10, 5], [6, 3]]), chain = Array(e).fill(b).join(' · ');
+      return num5('k5_potenz', 1, `po1-${b}-${e}`, `Berechne: <b>${b}<sup>${e}</sup></b>`, b ** e, [`Die Hochzahl sagt, wie oft ${b} als Faktor vorkommt.`, `Rechne ${chain}.`], `${chain} = <b>${de5(b ** e)}</b>.`, {meta: {term: chain.replace(/·/g, '*')}}); }
+    const start = pick([1, 2, 3, 5]), n = rnd(3, 6), v = start * 2 ** n;
+    return num5('k5_potenz', 2, `po2-${start}-${n}`, `Bakterien verdoppeln sich jede Stunde. Am Anfang sind es <b>${start}</b>.<br>Wie viele sind es nach <b>${n} Stunden</b>?`, v, ['Nach jeder Stunde wird die Anzahl mit 2 malgenommen.', `Rechne ${start} · 2<sup>${n}</sup>.`], `${start} · 2<sup>${n}</sup> = ${start} · ${2 ** n} = <b>${v}</b>.`, {meta: {term: `${start}*Math.pow(2,${n})`}});
+  },
+  k5_teilbar(d) {
+    if (d === 0) { const t = pick([2, 3, 4, 5, 9, 10]), yes = rnd(0, 1); let n = rnd(10, 90) * t; if (!yes) n += rnd(1, t - 1);
+      return T('k5_teilbar', 0, `tb0-${n}-${t}`, 'choice', `Ist <b>${n}</b> durch <b>${t}</b> teilbar?`, {v: n % t === 0 ? 'ja' : 'nein'}, ['Denke an die Teilbarkeitsregel.', t === 3 || t === 9 ? 'Bilde die Quersumme.' : t === 4 ? 'Prüfe die letzten beiden Ziffern.' : 'Prüfe die letzte Ziffer.'], `${n} : ${t} ${n % t === 0 ? 'geht auf' : 'hat einen Rest'}.`, {options: ['ja', 'nein'], meta: {yes: n % t === 0}}); }
+    if (d === 1) { const n = pick([12, 16, 18, 20, 24, 28, 30, 32, 36, 40, 42, 45, 48, 54, 60, 64, 72]), dv5 = []; for (let i = 1; i <= n; i++) if (n % i === 0) dv5.push(i);
+      return num5('k5_teilbar', 1, `tb1-${n}`, `Wie viele Teiler hat die Zahl <b>${n}</b>?`, dv5.length, ['Suche Teilerpaare: 1 · ?, 2 · ?, …', 'Zähle auch 1 und die Zahl selbst mit.'], `T(${n}) = {${dv5.join('; ')}}, das sind <b>${dv5.length}</b> Teiler.`); }
+    if (rnd(0, 1)) { const pr = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47], p = pick(pr), bad = shuf([15, 21, 27, 33, 35, 39, 49, 51, 55, 57, 63, 65]).slice(0, 3);
+      return pickMC('k5_teilbar', 2, `tb2p-${p}-${bad.join()}`, 'Welche Zahl ist eine <b>Primzahl</b>?', p, bad, ['Eine Primzahl hat genau zwei Teiler.', 'Prüfe, ob die Zahlen durch 3, 5 oder 7 teilbar sind.'], `<b>${p}</b> ist nur durch 1 und sich selbst teilbar.`); }
+    const fs = [rnd(0, 1) ? 2 : 3, pick([2, 3, 5]), pick([3, 5, 7])].sort((x, y) => x - y), n = fs[0] * fs[1] * fs[2];
+    return num5('k5_teilbar', 2, `tb2f-${n}`, `Zerlege <b>${n}</b> in Primfaktoren. Wie groß ist der <b>größte</b> Primfaktor?`, fs[2], ['Teile so oft wie möglich durch 2, dann durch 3, 5, 7.', 'Mache weiter, bis nur Primzahlen übrig sind.'], `${n} = ${fs.join(' · ')}. Der größte Primfaktor ist <b>${fs[2]}</b>.`);
+  },
+  k5_ggt(d) {
+    let a, b; const g = d === 2 ? rnd(4, 12) : rnd(2, 6);
+    do { a = rnd(2, d === 0 ? 6 : 9); b = rnd(2, d === 0 ? 6 : 9); } while (a === b || gcd(a, b) !== 1);
+    const x = a * g, y = b * g;
+    if (rnd(0, 1)) return num5('k5_ggt', d, `gg-${x}-${y}`, `Bestimme den <b>größten gemeinsamen Teiler</b> von ${x} und ${y}.`, g, ['Schreibe die Teiler beider Zahlen auf.', 'Gesucht ist die größte Zahl, die in beiden Listen steht.'], `ggT(${x}; ${y}) = <b>${g}</b>.`);
+    return num5('k5_ggt', d, `kg-${x}-${y}`, `Bestimme das <b>kleinste gemeinsame Vielfache</b> von ${x} und ${y}.`, lcm(x, y), ['Schreibe die Vielfachen beider Zahlen auf.', `Beginne mit den Vielfachen von ${Math.max(x, y)} und prüfe, welches auch durch ${Math.min(x, y)} teilbar ist.`], `kgV(${x}; ${y}) = <b>${lcm(x, y)}</b>.`);
+  },
+  k5_kombi(d) {
+    const a = rnd(2, 5), b = rnd(2, 5), c = rnd(2, 4);
+    if (d === 0) return num5('k5_kombi', 0, `ko0-${a}-${b}`, `Mia hat <b>${a} T-Shirts</b> und <b>${b} Hosen</b>. Wie viele verschiedene Kombinationen aus T-Shirt und Hose gibt es?`, a * b, ['Zu jedem T-Shirt passt jede Hose.', 'Zeichne ein Baumdiagramm oder rechne mal.'], `${a} · ${b} = <b>${a * b}</b> Möglichkeiten.`, {meta: {term: `${a}*${b}`}});
+    if (d === 1) return num5('k5_kombi', 1, `ko1-${a}-${b}-${c}`, `Ein Menü besteht aus Vorspeise, Hauptgericht und Nachtisch. Zur Wahl stehen <b>${a}</b> Vorspeisen, <b>${b}</b> Hauptgerichte und <b>${c}</b> Nachspeisen.<br>Wie viele Menüs sind möglich?`, a * b * c, ['Zählprinzip: Anzahl der Möglichkeiten malnehmen.', `Rechne ${a} · ${b} · ${c}.`], `${a} · ${b} · ${c} = <b>${a * b * c}</b>.`, {meta: {term: `${a}*${b}*${c}`}});
+    const n = rnd(3, 6), f = Array.from({length: n}, (_, i) => n - i);
+    if (rnd(0, 1)) return num5('k5_kombi', 2, `ko2-${n}`, `<b>${n}</b> Kinder stellen sich in einer Reihe auf. Wie viele verschiedene Reihenfolgen gibt es?`, f.reduce((x, y) => x * y, 1), [`Für den ersten Platz gibt es ${n} Möglichkeiten, für den zweiten eine weniger.`, `Rechne ${f.join(' · ')}.`], `${f.join(' · ')} = <b>${f.reduce((x, y) => x * y, 1)}</b>.`, {meta: {term: f.join('*')}});
+    const m = rnd(4, 9);
+    return num5('k5_kombi', 2, `ko2h-${m}`, `<b>${m}</b> Freunde geben sich zur Begrüßung die Hand. Jeder jedem genau einmal. Wie viele Händedrücke sind das?`, m * (m - 1) / 2, [`Jeder gibt ${m - 1} anderen die Hand.`, 'Jeder Händedruck wird dabei doppelt gezählt.'], `${m} · ${m - 1} : 2 = <b>${m * (m - 1) / 2}</b>.`, {meta: {term: `${m}*${m - 1}/2`}});
+  },
+  k5_gz_ordnen(d) {
+    if (d === 0) { const a = rnd(-20, 20); let b; do { b = rnd(-20, 20); } while (a === b);
+      return T('k5_gz_ordnen', 0, `go0-${a}-${b}`, 'choice', `Welches Zeichen passt?<br><b>${sg5(a)} ☐ ${sg5(b)}</b>`, {v: a < b ? '<' : '>'}, ['Auf dem Zahlenstrahl liegt die kleinere Zahl weiter links.', '−10 ist kleiner als −2.'], `${sg5(a)} ${a < b ? '&lt;' : '&gt;'} ${sg5(b)}.`, {options: ['<', '=', '>'], meta: {cmp: a - b}}); }
+    if (d === 1) { const a = pick([-1, 1]) * rnd(1, 90);
+      if (rnd(0, 1)) return num5('k5_gz_ordnen', 1, `go1b-${a}`, `Wie groß ist der <b>Betrag</b> |${sg5(a)}|?`, Math.abs(a), ['Der Betrag ist der Abstand zur Null.', 'Ein Abstand ist nie negativ.'], `|${sg5(a)}| = <b>${Math.abs(a)}</b>.`);
+      return neg5('k5_gz_ordnen', 1, `go1g-${a}`, `Wie heißt die <b>Gegenzahl</b> von <b>${sg5(a)}</b>?`, -a, ['Die Gegenzahl liegt gleich weit von 0 entfernt, aber auf der anderen Seite.', 'Nur das Vorzeichen ändert sich.'], `Die Gegenzahl von ${sg5(a)} ist <b>${sg5(-a)}</b>.`); }
+    const a = -rnd(1, 15), b = rnd(1, 15);
+    return num5('k5_gz_ordnen', 2, `go2-${a}-${b}`, `Wie groß ist der Abstand zwischen <b>${sg5(a)}</b> und <b>${b}</b> auf dem Zahlenstrahl?`, b - a, ['Gehe zuerst bis zur 0, dann weiter.', `Von ${sg5(a)} bis 0 sind es ${-a} Schritte.`], `${-a} + ${b} = <b>${b - a}</b>.`, {meta: {term: `${b}-(${a})`}});
+  },
+  k5_gz_plus(d) {
+    const m = [12, 40, 150][d]; let a = rnd(-m, m), b = rnd(-m, m); if (a >= 0 && b >= 0) a = -rnd(1, m);
+    const sub = d > 0 && rnd(0, 1), v = sub ? a - b : a + b, t = `${par5(a)} ${sub ? '−' : '+'} ${par5(b)}`;
+    return neg5('k5_gz_plus', d, `gp-${t}`, `Berechne: <b>${t}</b>`, v, [sub ? 'Subtrahieren heißt: die Gegenzahl addieren.' : 'Gleiche Vorzeichen: Beträge addieren. Verschiedene: Beträge subtrahieren.', 'Stell dir den Zahlenstrahl oder ein Thermometer vor.'], `${t} = <b>${sg5(v)}</b>.`);
+  },
+  k5_gz_mal(d) {
+    const a = pick([-1, 1]) * rnd(2, [9, 12, 25][d]); let b = pick([-1, 1]) * rnd(2, [9, 12, 15][d]); if (a > 0 && b > 0) b = -b;
+    const tip = ['Gleiche Vorzeichen: Ergebnis positiv. Verschiedene Vorzeichen: Ergebnis negativ.', 'Rechne zuerst ohne Vorzeichen, dann bestimme das Vorzeichen.'];
+    if (d === 0 || rnd(0, 1)) return neg5('k5_gz_mal', d, `gmm-${a}-${b}`, `Berechne: <b>${par5(a)} · ${par5(b)}</b>`, a * b, tip, `${par5(a)} · ${par5(b)} = <b>${sg5(a * b)}</b>.`);
+    return neg5('k5_gz_mal', d, `gmd-${a}-${b}`, `Berechne: <b>${par5(a * b)} : ${par5(b)}</b>`, a, tip, `${par5(a * b)} : ${par5(b)} = <b>${sg5(a)}</b>.`);
+  },
+  k5_gz_sach(d) {
+    const t = rnd(1, 14), u = rnd(2, 18), k = rnd(2, 8), c = rnd(2, 9);
+    if (d === 0) return neg5('k5_gz_sach', 0, `gs0-${t}-${u}`, `Morgens sind es <b>${sg5(-t)} °C</b>. Bis zum Mittag steigt die Temperatur um <b>${u} Grad</b>. Wie warm ist es dann (in °C)?`, u - t, ['Gehe auf dem Thermometer nach oben.', `Rechne ${sg5(-t)} + ${u}.`], `${sg5(-t)} + ${u} = <b>${sg5(u - t)} °C</b>.`);
+    if (d === 1) return neg5('k5_gz_sach', 1, `gs1-${t * 5}-${u * 10}`, `Auf dem Konto sind <b>${t * 5} €</b>. Es werden <b>${u * 10} €</b> abgebucht. Wie ist der Kontostand in Euro?`, t * 5 - u * 10, ['Abbuchen heißt subtrahieren.', 'Wird mehr abgebucht als vorhanden, ist der Stand negativ.'], `${t * 5} − ${u * 10} = <b>${sg5(t * 5 - u * 10)} €</b>.`);
+    const v = -k * c + t;
+    return neg5('k5_gz_sach', 2, `gs2-${k}-${c}-${t}`, `Berechne: <b>(−${k}) · ${c} + ${t}</b>`, v, ['Punkt vor Strich.', `Rechne zuerst (−${k}) · ${c}.`], `${sg5(-k * c)} + ${t} = <b>${sg5(v)}</b>.`);
+  },
+  k5_koord(d) {
+    const x = rnd(1, 8), y = rnd(1, 8), svg = coord5(x, y);
+    const tips = ['Zuerst nach rechts (x), dann nach oben (y).', 'Merke: Erst über den Flur gehen, dann die Treppe hoch.'];
+    if (d === 0) { const ax = rnd(0, 1); return num5('k5_koord', 0, `kz0-${x}-${y}-${ax}`, `Wie groß ist die <b>${ax ? 'y' : 'x'}-Koordinate</b> des Punktes P?`, ax ? y : x, tips, `P hat die Koordinaten (${x} | ${y}). Gesucht: <b>${ax ? y : x}</b>.`, {svg}); }
+    if (d === 1) return pickMC('k5_koord', 1, `kz1-${x}-${y}`, 'Welche Koordinaten hat der Punkt P?', `(${x} | ${y})`, [x !== y ? `(${y} | ${x})` : `(${x - 1} | ${y})`, `(${x + 1} | ${y})`, `(${x} | ${y + 1})`], tips, `P liegt bei <b>(${x} | ${y})</b>.`, {svg});
+    const dx = rnd(1, 6), dy = rnd(1, 6), which = rnd(0, 1);
+    return num5('k5_koord', 2, `kz2-${x}-${y}-${dx}-${dy}-${which}`, `Der Punkt A (${x} | ${y}) wird um <b>${dx}</b> nach rechts und <b>${dy}</b> nach oben verschoben.<br>Wie groß ist die neue <b>${which ? 'y' : 'x'}-Koordinate</b>?`, which ? y + dy : x + dx, tips, `Neuer Punkt: (${x + dx} | ${y + dy}).`, {meta: {term: which ? `${y}+${dy}` : `${x}+${dx}`}});
+  },
+  k5_winkel(d) {
+    if (d === 0) { const [nm, w] = pick([['spitzer Winkel', rnd(2, 15) * 5], ['rechter Winkel', 90], ['stumpfer Winkel', rnd(21, 33) * 5], ['gestreckter Winkel', 180], ['überstumpfer Winkel', rnd(42, 68) * 5]]);
+      return pickMC('k5_winkel', 0, `wi0-${w}`, `Welche Winkelart ist ein Winkel von <b>${w}°</b>?`, nm, shuf(['spitzer Winkel', 'rechter Winkel', 'stumpfer Winkel', 'gestreckter Winkel', 'überstumpfer Winkel'].filter(x => x !== nm)).slice(0, 2), ['Spitz: unter 90°. Stumpf: zwischen 90° und 180°.', 'Genau 90° ist recht, genau 180° gestreckt, darüber überstumpf.'], `${w}° ist ein <b>${nm}</b>.`, {svg: angle5(w)}); }
+    if (d === 1) { const a = rnd(5, 34) * 5;
+      if (rnd(0, 1)) return num5('k5_winkel', 1, `wi1n-${a}`, `Zwei <b>Nebenwinkel</b>: Der eine ist <b>${a}°</b> groß. Wie groß ist der andere (in Grad)?`, 180 - a, ['Nebenwinkel ergänzen sich zu einem gestreckten Winkel.', 'Zusammen sind es 180°.'], `180° − ${a}° = <b>${180 - a}°</b>.`, {meta: {term: `180-${a}`}});
+      return num5('k5_winkel', 1, `wi1s-${a}`, `Zwei Geraden schneiden sich. Ein Winkel ist <b>${a}°</b>. Wie groß ist sein <b>Scheitelwinkel</b> (in Grad)?`, a, ['Scheitelwinkel liegen sich gegenüber.', 'Sie sind gleich groß.'], `Scheitelwinkel sind gleich groß: <b>${a}°</b>.`); }
+    const a = rnd(5, 17) * 5, b = rnd(5, 17) * 5;
+    return num5('k5_winkel', 2, `wi2-${a}-${b}`, `An einer Geraden liegen drei Winkel nebeneinander, zusammen ein gestreckter Winkel. Zwei sind <b>${a}°</b> und <b>${b}°</b>. Wie groß ist der dritte (in Grad)?`, 180 - a - b, ['Ein gestreckter Winkel hat 180°.', `Ziehe ${a}° und ${b}° von 180° ab.`], `180° − ${a}° − ${b}° = <b>${180 - a - b}°</b>.`, {meta: {term: `180-${a}-${b}`}});
+  },
+  k5_geld(d) {
+    if (d === 0) return unit5('k5_geld', 0, [['€', 'ct', 100]]);
+    if (d === 1) { const p = rnd(2, 9) * 10 + pick([5, 0]), n = rnd(2, 8); return num5('k5_geld', 1, `ge1-${p}-${n}`, `Ein Brötchen kostet <b>${p} ct</b>. Wie viel Cent kosten <b>${n}</b> Brötchen?`, p * n, ['Rechne Einzelpreis mal Anzahl.', `${p} · ${n}`], `${p} · ${n} = <b>${p * n} ct</b>.`, {meta: {term: `${p}*${n}`}}); }
+    const a = rnd(105, 890), b = rnd(25, 95) * 5, pay = Math.ceil((a + b) / 1000) * 1000;
+    return num5('k5_geld', 2, `ge2-${a}-${b}`, `Du kaufst ein Heft für <b>${decStr(a, 2)} €</b> und einen Stift für <b>${decStr(b, 2)} €</b>. Du bezahlst mit <b>${pay / 100} €</b>.<br>Wie viel <b>Cent</b> bekommst du zurück?`, pay - a - b, ['Rechne alles in Cent um.', 'Rückgeld = bezahlt minus beide Preise.'], `${pay} ct − ${a} ct − ${b} ct = <b>${pay - a - b} ct</b>.`, {meta: {term: `${pay}-${a}-${b}`}});
+  },
+  k5_masse(d) { return unit5('k5_masse', d, [['kg', 'g', 1000], ['t', 'kg', 1000], ['g', 'mg', 1000]]); },
+  k5_laenge(d) { return unit5('k5_laenge', d, [['m', 'cm', 100], ['km', 'm', 1000], ['cm', 'mm', 10], ['dm', 'cm', 10], ['m', 'dm', 10]]); },
+  k5_zeit(d) {
+    if (d === 0) return unit5('k5_zeit', 0, [['h', 'min', 60], ['min', 's', 60], ['d', 'h', 24]]);
+    const h = rnd(6, 17), m = rnd(0, 11) * 5, dur = d === 1 ? rnd(4, 11) * 5 : rnd(13, 40) * 5, end = h * 60 + m + dur, hm = x => `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')} Uhr`;
+    return num5('k5_zeit', d, `ze-${h}-${m}-${dur}`, `Ein Bus fährt um <b>${hm(h * 60 + m)}</b> ab und kommt um <b>${hm(end)}</b> an. Wie viele <b>Minuten</b> dauert die Fahrt?`, dur, ['Zähle zuerst bis zur nächsten vollen Stunde.', 'Dann die vollen Stunden und die restlichen Minuten.'], `Die Fahrt dauert <b>${dur} Minuten</b>.`, {meta: {term: `${end}-${h * 60 + m}`}});
+  },
+  k5_hohlmass(d) { return unit5('k5_hohlmass', d, [['l', 'ml', 1000], ['hl', 'l', 100], ['l', 'cl', 100]]); },
+  k5_massstab(d) {
+    if (d === 0) { const s = pick([10, 20, 50, 100]), n = rnd(2, 12); return num5('k5_massstab', 0, `ma0-${s}-${n}`, `Maßstab <b>1 : ${s}</b>. Eine Strecke ist in der Zeichnung <b>${n} cm</b> lang. Wie lang ist sie in Wirklichkeit (in cm)?`, s * n, [`1 cm in der Zeichnung sind ${s} cm in Wirklichkeit.`, `${n} · ${s}`], `${n} · ${s} = <b>${s * n} cm</b>.`, {meta: {term: `${n}*${s}`}}); }
+    if (d === 1) { const s = pick([10, 20, 50, 100]), n = rnd(2, 20); return num5('k5_massstab', 1, `ma1-${s}-${n}`, `Maßstab <b>1 : ${s}</b>. Etwas ist in Wirklichkeit <b>${de5(s * n)} cm</b> lang. Wie viele cm sind das in der Zeichnung?`, n, ['In der Zeichnung ist alles kleiner.', `Teile durch ${s}.`], `${s * n} : ${s} = <b>${n} cm</b>.`, {meta: {term: `${s * n}/${s}`}}); }
+    const k = pick([10, 20, 50, 100, 200]), z = rnd(2, 9);
+    return num5('k5_massstab', 2, `ma2-${k}-${z}`, `Eine Strecke ist in der Zeichnung <b>${z} cm</b> und in Wirklichkeit <b>${de5(z * k)} cm</b> lang. Wie lautet die Zahl im Maßstab <b>1 : ?</b>`, k, ['Wie oft passt die Zeichenlänge in die wirkliche Länge?', `Rechne ${z * k} : ${z}.`], `${z * k} : ${z} = ${k}, also Maßstab <b>1 : ${k}</b>.`, {meta: {term: `${z * k}/${z}`}});
+  },
+  k5_dreisatz(d) {
+    const [ding, e] = pick([['Hefte', 'ct'], ['Äpfel', 'ct'], ['Kinokarten', '€'], ['Bälle', '€'], ['Eiskugeln', 'ct']]), price = e === 'ct' ? rnd(4, 30) * 5 : rnd(3, 15), a = rnd(2, 6); let b; do { b = rnd(2, 12); } while (b === a);
+    if (d === 0) return num5('k5_dreisatz', 0, `ds0-${ding}-${a}-${price}`, `<b>${a} ${ding}</b> kosten <b>${a * price} ${e}</b>. Wie viel ${e} kostet <b>ein</b> Stück?`, price, ['Teile den Preis durch die Anzahl.', `${a * price} : ${a}`], `${a * price} : ${a} = <b>${price} ${e}</b>.`, {meta: {term: `${a * price}/${a}`}});
+    if (d === 1) { const k = rnd(2, 5); return num5('k5_dreisatz', 1, `ds1-${ding}-${a}-${k}-${price}`, `<b>${a} ${ding}</b> kosten <b>${a * price} ${e}</b>. Wie viel ${e} kosten <b>${a * k}</b> ${ding}?`, a * k * price, [`Wie oft stecken ${a} in ${a * k}?`, 'Vervielfache den Preis genauso.'], `${a * price} · ${k} = <b>${a * k * price} ${e}</b>.`, {meta: {term: `${a * price}*${k}`}}); }
+    return num5('k5_dreisatz', 2, `ds2-${ding}-${a}-${b}-${price}`, `<b>${a} ${ding}</b> kosten <b>${a * price} ${e}</b>. Wie viel ${e} kosten <b>${b}</b> ${ding}?`, b * price, ['Erst auf 1 Stück schließen.', 'Dann auf die gesuchte Anzahl.'], `1 Stück: ${price} ${e}. ${b} Stück: <b>${b * price} ${e}</b>.`, {meta: {term: `${a * price}/${a}*${b}`}});
+  },
+  k5_umfang(d) {
+    const a = rnd(3, 25), b = rnd(2, 15);
+    if (d === 0) return num5('k5_umfang', 0, `um0-${a}-${b}`, 'Berechne den <b>Umfang</b> des Rechtecks (in cm).', 2 * (a + b), ['Der Umfang ist der Weg einmal rundherum.', 'u = 2 · (a + b)'], `u = 2 · (${a} + ${b}) = <b>${2 * (a + b)} cm</b>.`, {svg: rect5(a, b, 'cm'), meta: {term: `2*(${a}+${b})`}});
+    if (d === 1) return num5('k5_umfang', 1, `um1-${a}-${b}`, `Ein Rechteck hat den Umfang <b>${2 * (a + b)} m</b>. Eine Seite ist <b>${a} m</b> lang. Wie lang ist die andere (in m)?`, b, ['Der halbe Umfang ist a + b.', `Rechne ${a + b} − ${a}.`], `${2 * (a + b)} : 2 − ${a} = <b>${b} m</b>.`, {meta: {term: `${2 * (a + b)}/2-${a}`}});
+    const s = [rnd(3, 12), rnd(3, 12), rnd(3, 12), rnd(3, 12), rnd(3, 12)], n = rnd(4, 5), sd = s.slice(0, n);
+    return num5('k5_umfang', 2, `um2-${sd.join('-')}`, `Ein Grundstück ist ein ${n === 4 ? 'Viereck' : 'Fünfeck'} mit den Seiten <b>${sd.join(' m, ')} m</b>. Wie viele Meter Zaun braucht man rundherum?`, sd.reduce((x, y) => x + y, 0), ['Addiere alle Seitenlängen.', 'Fasse geschickt zusammen.'], `${sd.join(' + ')} = <b>${sd.reduce((x, y) => x + y, 0)} m</b>.`, {meta: {term: sd.join('+')}});
+  },
+  k5_flaeche(d) {
+    const a = rnd(3, 25), b = rnd(2, 15);
+    if (d === 0) return num5('k5_flaeche', 0, `fl0-${a}-${b}`, 'Berechne den <b>Flächeninhalt</b> des Rechtecks (in cm²).', a * b, ['Flächeninhalt = Länge · Breite.', `${a} · ${b}`], `A = ${a} · ${b} = <b>${a * b} cm²</b>.`, {svg: rect5(a, b, 'cm'), meta: {term: `${a}*${b}`}});
+    if (d === 1) return num5('k5_flaeche', 1, `fl1-${a}-${b}`, `Ein Rechteck hat den Flächeninhalt <b>${a * b} m²</b>. Eine Seite ist <b>${a} m</b> lang. Wie lang ist die andere (in m)?`, b, ['Rechne die Formel rückwärts.', `Teile ${a * b} durch ${a}.`], `${a * b} : ${a} = <b>${b} m</b>.`, {meta: {term: `${a * b}/${a}`}});
+    return num5('k5_flaeche', 2, `fl2-${a}`, `Ein <b>Quadrat</b> hat den Umfang <b>${4 * a} cm</b>. Wie groß ist sein Flächeninhalt (in cm²)?`, a * a, ['Beim Quadrat sind alle vier Seiten gleich lang.', 'Berechne zuerst eine Seite.'], `Seite: ${4 * a} : 4 = ${a} cm. A = ${a} · ${a} = <b>${a * a} cm²</b>.`, {meta: {term: `(${4 * a}/4)*(${4 * a}/4)`}});
+  },
+  k5_feinheit(d) { return unit5('k5_feinheit', d, [['cm²', 'mm²', 100], ['dm²', 'cm²', 100], ['m²', 'dm²', 100], ['a', 'm²', 100], ['ha', 'a', 100], ['km²', 'ha', 100]]); },
+  k5_fzusammen(d) {
+    const a = rnd(6, 15), b = rnd(5, 12), c = rnd(2, a - 2), e = rnd(2, b - 2);
+    if (d === 0) return num5('k5_fzusammen', 0, `fz0-${a}-${b}-${c}-${e}`, `Eine Fläche besteht aus zwei Rechtecken: <b>${a} m · ${b} m</b> und <b>${c} m · ${e} m</b>. Wie groß ist die Gesamtfläche (in m²)?`, a * b + c * e, ['Berechne jedes Rechteck einzeln.', 'Addiere die beiden Ergebnisse.'], `${a * b} + ${c * e} = <b>${a * b + c * e} m²</b>.`, {meta: {term: `${a}*${b}+${c}*${e}`}});
+    if (d === 1) return num5('k5_fzusammen', 1, `fz1-${a}-${b}-${c}-${e}`, `Aus einem Rechteck (<b>${a} m · ${b} m</b>) wird an einer Ecke ein kleines Rechteck (<b>${c} m · ${e} m</b>) herausgeschnitten. Wie groß ist die Restfläche (in m²)?`, a * b - c * e, ['Große Fläche minus kleine Fläche.', `${a} · ${b} − ${c} · ${e}`], `${a * b} − ${c * e} = <b>${a * b - c * e} m²</b>.`, {meta: {term: `${a}*${b}-${c}*${e}`}});
+    const f = rnd(2, 5), g = rnd(2, 6);
+    return num5('k5_fzusammen', 2, `fz2-${a}-${b}-${f}-${g}`, `Eine Wohnung hat ein Wohnzimmer (<b>${a} m · ${b} m</b>), eine Küche (<b>${f} m · ${g} m</b>) und ein quadratisches Bad mit <b>${f} m</b> Seitenlänge. Wie groß ist die Wohnfläche (in m²)?`, a * b + f * g + f * f, ['Berechne jeden Raum einzeln.', 'Addiere alle drei Flächen.'], `${a * b} + ${f * g} + ${f * f} = <b>${a * b + f * g + f * f} m²</b>.`, {meta: {term: `${a}*${b}+${f}*${g}+${f}*${f}`}});
+  },
+  k5_tabellen(d) {
+    const names = shuf(['Fußball', 'Turnen', 'Schwimmen', 'Reiten', 'Tanzen']).slice(0, 3), v = [rnd(3, 14), rnd(3, 14), rnd(3, 14)];
+    const strich = n => '<b style="letter-spacing:2px">' + '<s>IIII</s> '.repeat(Math.floor(n / 5)) + 'I'.repeat(n % 5) + '</b>';
+    if (d === 0) { const i = rnd(0, 2); return num5('k5_tabellen', 0, `tl0-${v[i]}-${names[i]}`, `Strichliste für <b>${names[i]}</b>: ${strich(v[i])}<br>Wie viele Kinder sind das? (Ein durchgestrichenes Bündel sind 5.)`, v[i], ['Zähle zuerst die Fünferbündel.', 'Zähle dann die einzelnen Striche dazu.'], `Es sind <b>${v[i]}</b> Kinder.`); }
+    const table = tbl([['Sportart', ...names], ['Kinder', ...v]]);
+    if (d === 1) return num5('k5_tabellen', 1, `tl1-${v.join('-')}-${names.join()}`, `${table}<br>Wie viele Kinder wurden insgesamt befragt? (Jedes Kind hat eine Sportart genannt.)`, v[0] + v[1] + v[2], ['Addiere alle Werte.', 'Lies die zweite Zeile.'], `${v.join(' + ')} = <b>${v[0] + v[1] + v[2]}</b>.`, {meta: {term: v.join('+')}});
+    const g = [rnd(8, 15), rnd(8, 15)], bb = [rnd(2, g[0] - 2), rnd(2, g[1] - 2)], ask = rnd(0, 1);
+    return num5('k5_tabellen', 2, `tl2-${g.join('-')}-${bb.join('-')}-${ask}`, `${tbl([['', 'mit Tier', 'ohne Tier', 'gesamt'], ['Mädchen', bb[0], '?', g[0]], ['Jungen', bb[1], '?', g[1]]])}<br>Wie viele <b>${ask ? 'Jungen' : 'Mädchen'} ohne Haustier</b> sind es?`, g[ask] - bb[ask], ['Das ist eine Vierfeldertafel.', 'Ohne Tier = gesamt minus mit Tier.'], `${g[ask]} − ${bb[ask]} = <b>${g[ask] - bb[ask]}</b>.`, {meta: {term: `${g[ask]}-${bb[ask]}`}});
+  },
+  k5_diagramme(d) {
+    const names = ['Mo', 'Di', 'Mi', 'Do'], v = shuf([2, 4, 5, 7, 8, 9, 11, 13, 15, 17, 18]).slice(0, 4), svg = bars5(names, v);
+    if (d === 0) { const i = rnd(0, 3); return num5('k5_diagramme', 0, `dg0-${v.join('-')}-${i}`, `Das Diagramm zeigt ausgeliehene Bücher. Wie viele waren es am <b>${names[i]}</b>?`, v[i], ['Suche die passende Säule.', 'Lies die Zahl über der Säule ab.'], `Am ${names[i]} waren es <b>${v[i]}</b>.`, {svg}); }
+    const hi = Math.max(...v), lo = Math.min(...v);
+    if (d === 1) return num5('k5_diagramme', 1, `dg1-${v.join('-')}`, 'Wie groß ist der Unterschied zwischen dem höchsten und dem niedrigsten Wert?', hi - lo, ['Suche die höchste und die niedrigste Säule.', 'Subtrahiere.'], `${hi} − ${lo} = <b>${hi - lo}</b>.`, {svg, meta: {term: `Math.max(${v})-Math.min(${v})`}});
+    const s = v.reduce((x, y) => x + y, 0), extra = rnd(1, 9);
+    return num5('k5_diagramme', 2, `dg2-${v.join('-')}-${extra}`, `Am Freitag wurden <b>${extra}</b> Bücher mehr ausgeliehen als am Montag. Wie viele Bücher waren es von Montag bis Freitag zusammen?`, s + v[0] + extra, ['Berechne zuerst den Freitag.', 'Addiere dann alle fünf Tage.'], `Freitag: ${v[0] + extra}. Summe: <b>${s + v[0] + extra}</b>.`, {svg, meta: {term: `${v.join('+')}+${v[0]}+${extra}`}});
+  }
+});
+
+pool5('k5_begriffe', 'Überlege, ob die Linie Anfang und Ende hat.', `
+Wie heißt eine gerade Linie mit zwei Endpunkten?|Strecke|Gerade;Halbgerade;Kreislinie|Eine Strecke kann man messen.|*
+Wie heißt eine gerade Linie ohne Anfang und Ende?|Gerade|Strecke;Halbgerade;Radius||*
+Wie heißt eine gerade Linie mit einem Anfangspunkt, aber ohne Ende?|Halbgerade|Strecke;Gerade;Durchmesser|Man nennt sie auch Strahl.|*Strahl
+Wie heißt die Strecke vom Mittelpunkt eines Kreises zur Kreislinie?|Radius|Durchmesser;Umfang;Sehne||*
+Wie heißt die Strecke durch den Mittelpunkt von Rand zu Rand?|Durchmesser|Radius;Halbgerade;Tangente|Er ist doppelt so lang wie der Radius.|*
+Ein Kreis hat den Radius 4 cm. Wie lang ist sein Durchmesser?|8 cm|4 cm;2 cm;16 cm|Durchmesser = 2 · Radius.
+Zwei Geraden schneiden sich nie und haben überall den gleichen Abstand. Sie sind …|parallel|senkrecht;gleich lang;gekrümmt||*
+Zwei Geraden schneiden sich im rechten Winkel. Sie stehen … aufeinander.|senkrecht|parallel;schräg;gestreckt||*
+Wie nennt man ein „Tortenstück“ eines Kreises?|Kreissektor|Kreislinie;Radius;Sehne|Er wird von zwei Radien und dem Kreisbogen begrenzt.|*Sektor;Kreisausschnitt
+Wie misst man den Abstand eines Punktes von einer Geraden?|auf der Senkrechten zur Geraden|auf irgendeiner schrägen Linie;parallel zur Geraden;entlang eines Kreisbogens|Der Abstand ist die kürzeste Verbindung.
+Welches Zeichen gibt an, dass g und h parallel sind?|g ∥ h|g ⊥ h;g = h;g × h|
+`);
+pool5('k5_figuren', 'Achte auf Seitenlängen, parallele Seiten und rechte Winkel.', `
+Welches Viereck hat vier gleich lange Seiten und vier rechte Winkel?|Quadrat|Raute;Rechteck;Trapez||*
+Welches Viereck hat vier rechte Winkel, gegenüberliegende Seiten sind gleich lang?|Rechteck|Raute;Drachen;Trapez||*
+Welches Viereck hat vier gleich lange Seiten, aber nicht unbedingt rechte Winkel?|Raute|Rechteck;Trapez;Drachen||*Rhombus
+Welches Viereck hat zwei Paare paralleler Seiten?|Parallelogramm|Drachenviereck;Dreieck;Kreis||*
+Ein Viereck mit mindestens einem Paar paralleler Seiten heißt …|Trapez|Drachen;Dreieck;Fünfeck||*
+Welches Viereck hat zwei Paare gleich langer Nachbarseiten?|Drachenviereck|Trapez;Rechteck;Kreis||*Drachen
+Ein Dreieck mit drei gleich langen Seiten heißt …|gleichseitig|rechtwinklig;stumpfwinklig;unregelmäßig||*
+Ein Dreieck mit zwei gleich langen Seiten heißt …|gleichschenklig|rechtwinklig;parallel;gestreckt||*
+Ein Dreieck mit einem 90°-Winkel heißt …|rechtwinklig|spitzwinklig;gleichseitig;stumpfwinklig||*
+Wie viele Diagonalen hat ein Viereck?|2|1;3;4|
+Wie viele Ecken hat ein Sechseck?|6|4;5;8|
+`);
+pool5('k5_koerper', 'Stell dir den Körper als Gegenstand vor.', `
+Welcher Körper hat 6 gleich große Quadrate als Flächen?|Würfel|Quader;Pyramide;Zylinder||*
+Welchen Körper hat eine Konservendose?|Zylinder|Kegel;Kugel;Prisma||*
+Welcher Körper hat nur eine gekrümmte Fläche und keine Ecken und Kanten?|Kugel|Würfel;Kegel;Zylinder||*
+Welcher Körper sieht aus wie eine Eistüte?|Kegel|Zylinder;Kugel;Quader||*
+Wie viele Ecken hat ein Quader?|8|6;12;4|
+Wie viele Kanten hat ein Würfel?|12|8;6;10|
+Wie viele Flächen hat ein Quader?|6|4;8;12|
+Welcher Körper hat eine eckige Grundfläche und Dreiecke, die sich in einer Spitze treffen?|Pyramide|Prisma;Zylinder;Kugel||*
+Wie viele Ecken hat eine Pyramide mit quadratischer Grundfläche?|5|4;6;8|4 Ecken unten und die Spitze.
+Welcher Körper hat zwei deckungsgleiche Vielecke als Grund- und Deckfläche und Rechtecke als Seiten?|Prisma|Pyramide;Kegel;Kugel||*
+Wie viele Flächen hat ein dreiseitiges Prisma?|5|3;4;6|2 Dreiecke und 3 Rechtecke.
+`);
+pool5('k5_netze', 'Falte das Netz in Gedanken zusammen.', `
+Wie viele Quadrate hat ein Würfelnetz?|6|4;5;8|
+Wie viele Rechtecke hat das Netz eines Quaders?|6|4;5;8|
+Beim Spielwürfel ergeben gegenüberliegende Seiten zusammen immer …|7|6;8;9|1 liegt gegenüber 6, 2 gegenüber 5, 3 gegenüber 4.
+Welche Zahl liegt beim Spielwürfel gegenüber der 2?|5|4;6;3|
+Vier Quadrate in einer Reihe, dazu je eines oben und unten an beliebiger Stelle. Ergibt das ein Würfelnetz?|ja, immer|nein, nie;nur mit 5 Quadraten;nur wenn sie rot sind|
+Sechs Quadrate in einer einzigen Reihe: Lässt sich daraus ein Würfel falten?|nein|ja;nur mit Kleber;nur bei großen Quadraten|Die Flächen würden sich überdecken.
+Wie zeichnet man im Schrägbild die nach hinten laufenden Kanten?|schräg und verkürzt|waagrecht und doppelt so lang;senkrecht und gleich lang;gar nicht|Üblich sind 45° und die halbe Länge.
+Wie werden unsichtbare Kanten im Schrägbild gezeichnet?|gestrichelt|doppelt;rot und dick;mit Punkten an den Ecken||*
+Ein Würfel wird rundum angemalt und in 27 kleine Würfel zersägt. Wie viele kleine Würfel haben drei bemalte Seiten?|8|6;12;1|Das sind die Eckwürfel.
+Ein Turm ist 3 Würfel lang, 2 breit und 2 hoch. Aus wie vielen Würfeln besteht er?|12|7;10;18|3 · 2 · 2 = 12.
+`);
+
+/* --- Deutsch 5 --- */
+isl5('deutsch', 'k5d1', 1, 'Richtig schreiben', 'Rechtschreib-Insel', '✏️', '#6bd1ff', '#2d6bd6', 'd1', [
+  ['k5_d_laenge', 'Dehnung und Schärfung (ck, tz)', 'Doppel-Dock', '🔤', 'd_ss'],
+  ['k5_d_slaut', 's-Laute und das/dass', 'Zisch-Strand', '🐍', 'd_dass'],
+  ['k5_d_gross', 'Großschreibung', 'Groß-Gipfel', '🔠', 'd_gross'],
+  ['k5_d_silben', 'Vor- und Nachsilben, Anglizismen', 'Silben-Siedlung', '🧱', 'd_wortfamilie'],
+  ['k5_d_strategie', 'Rechtschreibstrategien und Wörterbuch', 'Nachschlage-Nische', '📖', 'd_synonym']
+]);
+isl5('deutsch', 'k5d2', 2, 'Wörter und Wortarten', 'Wortarten-Insel', '🔤', '#7be0c3', '#1c9c8c', 'd2', [
+  ['k5_d_wortart', 'Wortarten bestimmen', 'Wortarten-Wald', '🌲', 'd_wortart'],
+  ['k5_d_kasus', 'Nomen: Geschlecht, Zahl und Fall', 'Fälle-Felsen', '🚪', 'd_kasus'],
+  ['k5_d_adj', 'Adjektive und Steigerung', 'Steiger-Stufen', '📈', 'd_steig'],
+  ['k5_d_pron', 'Pronomen', 'Stellvertreter-Strand', '👥', 'pron'],
+  ['k5_d_zeit', 'Zeitformen des Verbs', 'Zeiten-Zinnen', '⏳', 'd_zeit'],
+  ['k5_d_wortbau', 'Wortbildung, Wortfamilien und Wortfelder', 'Baukasten-Bucht', '🧩', 'wortbildung']
+]);
+isl5('deutsch', 'k5d3', 3, 'Sätze und Zeichen', 'Satz-Insel', '🧱', '#ffd36b', '#e08a1c', 'd3', [
+  ['k5_d_satzglied', 'Satzglieder', 'Satzglied-Siedlung', '🧩', 'd_satzglied'],
+  ['k5_d_satzart', 'Satzarten', 'Ausrufe-Alm', '❗', 'd_rede'],
+  ['k5_d_nebensatz', 'Haupt- und Nebensatz', 'Gefüge-Garten', '🔗', 'd_satzbau'],
+  ['k5_d_komma', 'Kommasetzung', 'Komma-Küste', '✂️', 'd_komma'],
+  ['k5_d_rede', 'Wörtliche Rede', 'Rede-Rampe', '💬', 'd_rede']
+]);
+isl5('deutsch', 'k5d4', 4, 'Lesen, Schreiben und Medien', 'Lese-Insel', '📖', '#c8a0ff', '#6a3fd0', 'd4', [
+  ['k5_d_lesen', 'Texte verstehen', 'Lese-Lichtung', '📜', 'd_lesen'],
+  ['k5_d_textsorten', 'Märchen, Fabel und Gedicht', 'Märchen-Mühle', '🐺', 'd_lesen'],
+  ['k5_d_sprache', 'Sprachbilder, Umgangs- und Fremdwörter', 'Bilder-Brücke', '🎨', 'd_stil'],
+  ['k5_d_schreiben', 'Erzählen, Beschreiben, Briefe', 'Schreib-Station', '🖊️', 'd_stil'],
+  ['k5_d_medien', 'Gespräche, Vortragen und Medien', 'Medien-Mesa', '📺', 'voc_media']
+]);
+
+pool5('k5_d_laenge', 'Sprich das Wort langsam: Ist der Vokal kurz oder lang?', `
+Welche Schreibweise ist richtig?|der Rücken|der Rüken;der Rükken;der Rückken|Nach kurzem Vokal steht ck.
+Welche Schreibweise ist richtig?|die Katze|die Kaze;die Kazze;die Katse|Nach kurzem Vokal steht tz.
+Welche Schreibweise ist richtig?|der Löffel|der Löfel;der Lööfel;der Löffell|Nach kurzem Vokal wird der Konsonant verdoppelt.
+Welche Schreibweise ist richtig?|die Fahne|die Fane;die Faane;die Fahhne|Dehnungs-h nach langem a.
+Welche Schreibweise ist richtig?|das Boot|das Bot;das Boht;das Bott|Doppelvokal oo.
+Welche Schreibweise ist richtig?|die Biene|die Bine;die Biehne;die Binne|Langes i wird meist ie geschrieben.
+Welche Schreibweise ist richtig?|der Stuhl|der Stul;der Stull;der Stuuhl|Dehnungs-h.
+Welche Schreibweise ist richtig?|die Brücke|die Brüke;die Brükke;die Brüccke|
+Welche Schreibweise ist richtig?|schwimmen|schwimen;schwiemen;schwimmmen|Kurzes i, also mm.
+Welche Schreibweise ist richtig?|der Balken|der Balcken;der Ballken;der Balkken|Nach einem Konsonanten steht nie ck.
+Welche Schreibweise ist richtig?|das Herz|das Hertz;das Herrz;das Härz|Nach einem Konsonanten steht nie tz.
+Welche Schreibweise ist richtig?|nehmen|nemen;neemen;nehmmen|
+`);
+pool5('k5_d_slaut', 'Kurzer Vokal: ss. Langer Vokal oder Doppellaut: ß. Kannst du „dieses“ einsetzen: das.', `
+Welche Schreibweise ist richtig?|der Fluss|der Fluß;der Flus;der Flusss|Kurzes u, also ss.
+Welche Schreibweise ist richtig?|der Fuß|der Fuss;der Fus;der Fuhs|Langes u, also ß.
+Welche Schreibweise ist richtig?|die Straße|die Strasse;die Strase;die Straaße|
+Welche Schreibweise ist richtig?|das Wasser|das Waßer;das Waser;das Wassser|
+Welche Schreibweise ist richtig?|heißen|heissen;heisen;heiẞsen|Nach Doppellaut ß.
+Welche Schreibweise ist richtig?|die Rose|die Roße;die Rosse;die Rohse|Weiches s.
+Ich glaube, ___ es heute regnet.|dass|das;daß;daas|Es leitet einen Nebensatz ein und lässt sich nicht durch „dieses“ ersetzen.
+Das ist das Buch, ___ ich suche.|das|dass;daß;dasss|Du kannst „welches“ einsetzen.
+Ich hoffe, ___ du kommst.|dass|das;daß;dasz|
+___ Pferd steht auf der Weide.|Das|Dass;Daß;Daas|Artikel.
+Lena weiß, ___ Training ausfällt.|dass|das;daß;dahs|
+Ein Kind, ___ viel liest, lernt neue Wörter.|das|dass;daß;daas|Relativpronomen: „welches“ passt.
+`);
+pool5('k5_d_gross', 'Nomen, Satzanfänge und die höfliche Anrede schreibt man groß.', `
+Welcher Satz ist richtig geschrieben?|Der Hund jagt die Katze.|Der hund jagt die Katze.;der Hund jagt die Katze.;Der Hund Jagt die Katze.|
+Welcher Satz ist richtig geschrieben?|Beim Spielen vergisst er die Zeit.|Beim spielen vergisst er die Zeit.;Beim Spielen vergisst er die zeit.;beim Spielen vergisst er die Zeit.|„Beim“ macht aus dem Verb ein Nomen.
+Welcher Satz ist richtig geschrieben?|Ich wünsche dir viel Glück.|Ich wünsche dir viel glück.;ich wünsche dir viel Glück.;Ich Wünsche dir viel Glück.|
+Welcher Satz ist richtig geschrieben?|Sie hat etwas Schönes erlebt.|Sie hat etwas schönes erlebt.;Sie hat Etwas schönes erlebt.;Sie Hat etwas Schönes erlebt.|Nach „etwas“ wird das Adjektiv zum Nomen.
+Welcher Satz ist richtig geschrieben?|Haben Sie meinen Brief bekommen, Frau Huber?|Haben sie meinen Brief bekommen, Frau Huber?;haben Sie meinen Brief bekommen, Frau Huber?;Haben Sie meinen brief bekommen, Frau Huber?|Höfliche Anrede groß.
+Welcher Satz ist richtig geschrieben?|Am Montag schreiben wir einen Test.|Am montag schreiben wir einen Test.;Am Montag Schreiben wir einen Test.;Am Montag schreiben wir einen test.|Wochentage sind Nomen.
+Welcher Satz ist richtig geschrieben?|Das laute Lachen war überall zu hören.|Das laute lachen war überall zu hören.;Das Laute lachen war überall zu hören.;Das laute Lachen war Überall zu hören.|
+Welcher Satz ist richtig geschrieben?|Die Freundschaft ist mir wichtig.|Die freundschaft ist mir wichtig.;Die Freundschaft ist mir Wichtig.;die Freundschaft ist mir wichtig.|Wörter auf -schaft sind Nomen.
+Welche Endung zeigt dir ein Nomen an?|-ung|-lich;-ig;-isch|Auch -heit, -keit, -nis und -schaft.
+Welche Probe hilft, ein Nomen zu erkennen?|die Artikelprobe|die Reimprobe;die Silbenprobe;die Zeitprobe|Kann man der, die oder das davorsetzen?
+`);
+pool5('k5_d_silben', 'Zerlege das Wort in Vorsilbe, Wortstamm und Nachsilbe.', `
+Welche Schreibweise ist richtig?|das Fahrrad|das Farrad;das Fahrad;das Fahrradt|fahr + Rad: Beide r bleiben.
+Welche Schreibweise ist richtig?|verraten|veraten;ferraten;verrahten|ver + raten.
+Welche Schreibweise ist richtig?|die Vorfahrt|die Forfahrt;die Vorfart;die Vorrfahrt|Vorsilbe vor- mit V.
+Welche Schreibweise ist richtig?|entdecken|endecken;entdeken;enddecken|Vorsilbe ent-.
+Welche Schreibweise ist richtig?|endlich|entlich;endlig;endlisch|Kommt von „Ende“.
+Welche Schreibweise ist richtig?|freundlich|freundlig;freuntlich;freundlisch|Nachsilbe -lich.
+Welche Schreibweise ist richtig?|lustig|lustich;lustik;lustieg|Verlängern: lustige.
+Welche Schreibweise ist richtig?|das Ergebnis|das Ergebniss;das Ergäbnis;das Ergebnies|Nachsilbe -nis mit einem s.
+Welche Schreibweise ist richtig?|das T-Shirt|das T-shirt;das Tshirt;das T-Schirt|
+Welche Schreibweise ist richtig?|das Baby|das Bebi;das Babie;das Baybi|Englisches Fremdwort.
+Welche Schreibweise ist richtig?|der Computer|der Komputer;der Compjuter;der Computter|
+Welche Schreibweise ist richtig?|das Team|das Tiem;das Teem;das Taem|
+`);
+pool5('k5_d_strategie', 'Verlängern, ableiten, in Silben sprechen oder nachschlagen.', `
+Wie findest du heraus, ob „Hund“ mit d oder t endet?|Ich verlängere das Wort: die Hunde.|Ich schreibe es rückwärts.;Ich zähle die Buchstaben.;Ich setze „sehr“ davor.|
+Wie findest du heraus, ob man „Bäume“ mit äu schreibt?|Ich suche ein verwandtes Wort mit au: Baum.|Ich spreche es besonders laut.;Ich zähle die Silben.;Ich setze einen Artikel davor.|
+Welches Wort steht im Wörterbuch zuerst?|Apfel|Birne;Banane;Zebra|
+Welches Wort steht im Wörterbuch zuerst?|Haus|Hose;Hut;Hund|Zweiter Buchstabe: a vor o und u.
+Unter welcher Form findet man „ging“ im Wörterbuch?|gehen|ging;gegangen;gehst|Verben stehen in der Grundform.
+Unter welcher Form findet man „Häuser“?|Haus|Häuser;Häusern;häuslich|Nomen stehen in der Einzahl.
+Wie nennt man das Wort, unter dem ein Wörterbuchartikel steht?|Stichwort|Reimwort;Fürwort;Bindewort||*
+Welche Strategie hilft bei „Sommer“?|in Silben sprechen: Som-mer|das Wort steigern;den Satz umstellen;einen Reim suchen|
+Wie prüfst du, ob „er lie_t“ mit b oder p geschrieben wird?|Grundform bilden: lieben|das Wort großschreiben;die Silben zählen;ein Komma setzen|
+Was tust du, wenn dir beim Überarbeiten ein Wort unsicher ist?|im Wörterbuch nachschlagen|es weglassen;es zweimal schreiben;es großschreiben|
+`);
+pool5('k5_d_wortart', 'Frage dich: Benennt, beschreibt, begleitet oder verbindet das Wort?', `
+Welche Wortart ist „Garten“?|Nomen|Verb;Adjektiv;Adverb||*Substantiv
+Welche Wortart ist „klettern“?|Verb|Nomen;Adjektiv;Artikel||*
+Welche Wortart ist „mutig“?|Adjektiv|Verb;Nomen;Pronomen||*
+Welche Wortart ist „der“ in „der Baum“?|Artikel|Pronomen;Adverb;Numerale||*
+Welche Wortart ist „sieben“ in „sieben Zwerge“?|Numerale|Artikel;Verb;Konjunktion|Zahlwort.|*Zahlwort
+Welche Wortart ist „wir“?|Pronomen|Nomen;Artikel;Adverb||*Fürwort
+Welche Wortart ist „gestern“?|Adverb|Adjektiv;Nomen;Verb||*
+Welche Wortart ist „weil“?|Konjunktion|Adverb;Pronomen;Artikel||*Bindewort
+Welche Wortart ist „unter“ in „unter dem Tisch“?|Präposition|Konjunktion;Adverb;Adjektiv||*Verhältniswort
+Welche Wortart ist „oft“?|Adverb|Verb;Nomen;Numerale||*
+Welche Wortarten kann man beugen (deklinieren)?|Nomen und Adjektive|Adverbien und Konjunktionen;nur Präpositionen;gar keine|
+`);
+pool5('k5_d_kasus', 'Frage: Wer oder was? Wessen? Wem? Wen oder was?', `
+In welchem Fall steht „dem Kind“: Ich helfe dem Kind.|Dativ|Nominativ;Genitiv;Akkusativ|Wem helfe ich?|*
+In welchem Fall steht „den Ball“: Er wirft den Ball.|Akkusativ|Nominativ;Genitiv;Dativ|Wen oder was wirft er?|*
+In welchem Fall steht „Der Vogel“: Der Vogel singt.|Nominativ|Genitiv;Dativ;Akkusativ|Wer singt?|*
+In welchem Fall steht „des Lehrers“: Das Auto des Lehrers ist rot.|Genitiv|Nominativ;Dativ;Akkusativ|Wessen Auto?|*
+Welches grammatische Geschlecht hat „Mädchen“?|Neutrum (sächlich)|Femininum (weiblich);Maskulinum (männlich);keines|das Mädchen.
+Welches grammatische Geschlecht hat „Sonne“?|Femininum (weiblich)|Maskulinum (männlich);Neutrum (sächlich);keines|
+Wie heißt die Mehrzahl von „Atlas“?|Atlanten|Atlaser;Atlen;Atlantisse|
+Wie heißt die Mehrzahl von „Museum“?|Museen|Museums;Museume;Musea|
+Wie heißt der Fachbegriff für die Einzahl?|Singular|Plural;Genus;Kasus||*
+Wie heißt der Fachbegriff für die Mehrzahl?|Plural|Singular;Genus;Numerus||*
+Wie heißt der Fachbegriff für den Fall?|Kasus|Genus;Numerus;Tempus||*
+Welche Form passt? Ich gebe ___ Hund Futter.|dem|den;der;des|Wem?
+`);
+pool5('k5_d_adj', 'Grundstufe, Komparativ, Superlativ.', `
+Wie heißt der Komparativ von „gut“?|besser|guter;am besten;gütiger|
+Wie heißt der Superlativ von „viel“?|am meisten|am vielsten;mehr;am mehrsten|
+Wie heißt der Komparativ von „hoch“?|höher|hocher;höcher;am höchsten|
+Wie heißt der Superlativ von „nah“?|am nächsten|am nähesten;näher;am nahsten|
+Wie heißt der Komparativ von „dunkel“?|dunkler|dunkeler;dünkler;dunkelsten|
+Welcher Satz ist richtig?|Tom ist größer als Ben.|Tom ist größer wie Ben.;Tom ist mehr groß als Ben.;Tom ist am größer als Ben.|Bei Ungleichheit „als“.
+Welcher Satz ist richtig?|Mia ist so alt wie Lea.|Mia ist so alt als Lea.;Mia ist so älter wie Lea.;Mia ist als alt wie Lea.|Bei Gleichheit „so … wie“.
+Welches Adjektiv kann man nicht sinnvoll steigern?|tot|schnell;kalt;laut|
+Welches Wort beschreibt am treffendsten? Die ___ Zitrone.|saure|laute;eilige;kluge|
+Welche Frage hilft, ein Adjektiv zu finden?|Wie ist etwas?|Wer tut etwas?;Wann geschieht etwas?;Wohin geht jemand?|
+`);
+pool5('k5_d_pron', 'Pronomen stehen für Nomen oder begleiten sie.', `
+Was für ein Pronomen ist „er“?|Personalpronomen|Possessivpronomen;Relativpronomen;Demonstrativpronomen||*
+Was für ein Pronomen ist „mein“ in „mein Rad“?|Possessivpronomen|Personalpronomen;Relativpronomen;Demonstrativpronomen|Es zeigt den Besitz an.|*
+Was für ein Pronomen ist „dieser“ in „Dieser Film ist spannend“?|Demonstrativpronomen|Personalpronomen;Possessivpronomen;Relativpronomen|Es weist auf etwas hin.|*
+Was für ein Pronomen ist „der“ in „Der Junge, der dort steht“ (das zweite „der“)?|Relativpronomen|Personalpronomen;Possessivpronomen;bestimmter Artikel||*
+Welches Wort ersetzt „die Kinder“? Die Kinder lachen. ___ lachen.|Sie|Er;Es;Ihr|
+Welches Wort passt? Lisa nimmt ___ Tasche. (die von Lisa)|ihre|seine;eure;unsere|
+Welches Wort passt? Das ist der Hund, ___ gestern bellte.|der|dem;das;den|
+Welches Wort passt? Wir räumen ___ Zimmer auf.|unser|ihr;sein;euer|
+Wozu verwendet man Pronomen in Texten?|um Wiederholungen zu vermeiden und Sätze zu verknüpfen|um Sätze länger zu machen;um Zeiten anzugeben;um Zahlen zu nennen|
+Welches Pronomen ist in „Ich sehe dich“ das Objekt?|dich|Ich;sehe;keines|
+`);
+pool5('k5_d_zeit', 'Achte auf die Hilfsverben und Endungen.', `
+In welcher Zeit steht „Er ging nach Hause“?|Präteritum|Präsens;Perfekt;Futur I||*
+In welcher Zeit steht „Sie hat gelacht“?|Perfekt|Präteritum;Plusquamperfekt;Präsens||*
+In welcher Zeit steht „Wir hatten gegessen“?|Plusquamperfekt|Perfekt;Präteritum;Futur I||*
+In welcher Zeit steht „Ich werde lesen“?|Futur I|Präsens;Perfekt;Präteritum|werden + Grundform.|*Futur;Futur 1
+In welcher Zeit steht „Du schreibst“?|Präsens|Präteritum;Perfekt;Futur I||*
+Wie heißt das Präteritum von „er singt“?|er sang|er singte;er hat gesungen;er wird singen|
+Wie heißt das Perfekt von „sie läuft“?|sie ist gelaufen|sie hat gelaufen;sie lief;sie war gelaufen|
+Wie heißt das Plusquamperfekt von „er kommt“?|er war gekommen|er ist gekommen;er kam;er wird kommen|
+Welche Form ist eine infinite Verbform?|gespielt|du spielst;er spielt;wir spielten|Partizip und Infinitiv sind infinit.
+Welche Form ist eine finite Verbform?|er schläft|schlafen;geschlafen;schlafend|Sie zeigt Person und Zahl.
+Nachdem er ___ , ging er ins Bett.|gegessen hatte|isst;essen wird;gegessen hat|Vorzeitigkeit in der Vergangenheit: Plusquamperfekt.
+Wie nennt man das Perfekt-Partizip von „trinken“?|getrunken|getrinkt;getrank;trinkend|
+`);
+pool5('k5_d_wortbau', 'Suche den Wortstamm.', `
+Was ist der Wortstamm in „verlaufen“?|lauf|ver;en;verlauf||*
+Wie heißt der Wortteil vor dem Stamm?|Präfix|Suffix;Stamm;Endung|Vorsilbe.|*Vorsilbe
+Wie heißt der Wortteil hinter dem Stamm, z. B. -ung?|Suffix|Präfix;Stamm;Artikel|Nachsilbe.|*Nachsilbe
+Was ist bei „Haustür“ das Grundwort?|Tür|Haus;Haust;ür|Das letzte Wort ist das Grundwort.|*
+Was ist bei „Apfelbaum“ das Bestimmungswort?|Apfel|Baum;Apf;um|Es bestimmt das Grundwort genauer.|*
+Welches Wort gehört nicht zur Wortfamilie „fahren“?|Farbe|Fahrt;Fähre;Gefährt|
+Welches Wort gehört nicht zum Wortfeld „gehen“?|denken|schlendern;marschieren;eilen|
+Welches Wort passt zum Wortfeld „sagen“?|flüstern|hüpfen;blinzeln;grübeln|
+Welcher Artikel passt zu „Schultasche“?|die|der;das;den|Das Grundwort Tasche bestimmt den Artikel.
+Welche Nachsilbe macht aus „frei“ ein Nomen?|-heit|-lich;-bar;-ig|
+`);
+pool5('k5_d_satzglied', 'Mache die Umstellprobe: Was zusammen wandert, ist ein Satzglied.', `
+Welches Satzglied ist „Der Hund“ in „Der Hund bellt laut.“?|Subjekt|Prädikat;Dativobjekt;Akkusativobjekt|Wer oder was?|*
+Welches Satzglied ist „liest“ in „Emma liest ein Buch.“?|Prädikat|Subjekt;Objekt;Adverbiale||*
+Welches Satzglied ist „ein Buch“ in „Emma liest ein Buch.“?|Akkusativobjekt|Subjekt;Dativobjekt;Prädikat|Wen oder was?|*
+Welches Satzglied ist „der Oma“ in „Tim hilft der Oma.“?|Dativobjekt|Subjekt;Akkusativobjekt;Prädikat|Wem?|*
+Welches Satzglied ist „im Garten“ in „Wir spielen im Garten.“?|adverbiale Bestimmung des Ortes|adverbiale Bestimmung der Zeit;Akkusativobjekt;Subjekt|Wo?
+Welches Satzglied ist „am Abend“ in „Am Abend kommt Papa.“?|adverbiale Bestimmung der Zeit|adverbiale Bestimmung des Ortes;Subjekt;Dativobjekt|Wann?
+Mit welcher Probe findet man Satzglieder?|Umstellprobe|Artikelprobe;Reimprobe;Steigerungsprobe||*
+Welche zwei Satzglieder braucht fast jeder Satz?|Subjekt und Prädikat|Objekt und Adverbiale;zwei Objekte;Artikel und Nomen|
+Wie viele Satzglieder hat „Lea schenkt ihrem Bruder heute einen Ball.“?|5|3;4;7|Lea / schenkt / ihrem Bruder / heute / einen Ball.
+Mit welcher Frage findest du das Subjekt?|Wer oder was?|Wem?;Wen oder was?;Wo?|
+`);
+pool5('k5_d_satzart', 'Achte auf die Absicht des Sprechers und das Satzzeichen.', `
+Welche Satzart ist „Komm sofort her!“?|Aufforderungssatz|Fragesatz;Aussagesatz;Nebensatz||*
+Welche Satzart ist „Wann beginnt das Spiel?“?|Fragesatz|Aussagesatz;Ausrufesatz;Aufforderungssatz||*
+Welche Satzart ist „Die Schule beginnt um acht.“?|Aussagesatz|Fragesatz;Ausrufesatz;Aufforderungssatz||*
+Welche Satzart ist „Was für ein tolles Tor!“?|Ausrufesatz|Fragesatz;Aussagesatz;Nebensatz||*
+Welches Zeichen steht nach „Hast du Hunger“?|Fragezeichen|Punkt;Komma;Doppelpunkt|
+Wo steht das gebeugte Verb im Aussagesatz?|an zweiter Stelle|immer am Ende;immer an erster Stelle;gar nicht|
+Wo steht das Verb in einer Frage ohne Fragewort?|an erster Stelle|an letzter Stelle;an zweiter Stelle;an dritter Stelle|
+Welches ist eine höfliche Aufforderung?|Gib mir bitte den Stift.|Stift her!;Ich habe einen Stift.;Ist das ein Stift|
+Welcher Satz ist ein Fragesatz mit Fragewort?|Warum lachst du?|Lachst du?;Du lachst.;Lach doch!|
+Wie nennt man mehrere aneinandergereihte Hauptsätze?|Satzreihe|Satzgefüge;Satzglied;Wortfeld||*
+`);
+pool5('k5_d_nebensatz', 'Im Nebensatz steht das gebeugte Verb am Ende.', `
+Welcher Teil ist der Nebensatz? „Ich bleibe zu Hause, weil es regnet.“|weil es regnet|Ich bleibe zu Hause;zu Hause;Ich bleibe|
+Woran erkennt man einen Nebensatz?|Das gebeugte Verb steht am Ende.|Er beginnt immer groß.;Er hat kein Verb.;Er endet mit Ausrufezeichen.|
+Wie heißt die Verbindung aus Haupt- und Nebensatz?|Satzgefüge|Satzreihe;Satzglied;Wortfamilie||*
+Welches Wort leitet oft einen Nebensatz ein?|weil|und;aber;denn|„weil“ stellt das Verb ans Ende.
+Welches Wort verbindet zwei Hauptsätze?|und|weil;obwohl;damit|
+Welcher Satz ist eine Satzreihe?|Es regnet, aber wir spielen.|Wir spielen, obwohl es regnet.;Wenn es regnet, spielen wir.;Wir spielen, weil es regnet.|
+Wo steht der Nebensatz? „Wenn die Glocke läutet, gehen wir.“|vorangestellt|nachgestellt;eingeschoben;gar nicht|
+Wo steht der Nebensatz? „Der Hund, der bellt, ist klein.“|eingeschoben|vorangestellt;nachgestellt;gar nicht|
+Welche Konjunktion passt? Er zieht eine Jacke an, ___ es kalt ist.|weil|denn;und;oder|
+Welche Konjunktion passt? ___ ich Zeit habe, lese ich.|Wenn|Aber;Denn;Oder|
+`);
+pool5('k5_d_komma', 'Komma bei Aufzählungen, vor Nebensätzen, bei Anreden.', `
+Welcher Satz ist richtig?|Ich kaufe Äpfel, Birnen und Bananen.|Ich kaufe Äpfel Birnen und Bananen.;Ich kaufe Äpfel, Birnen, und Bananen.;Ich kaufe, Äpfel Birnen und Bananen.|Vor „und“ in Aufzählungen kein Komma.
+Welcher Satz ist richtig?|Ich glaube, dass er kommt.|Ich glaube dass er kommt.;Ich glaube dass, er kommt.;Ich, glaube dass er kommt.|
+Welcher Satz ist richtig?|Lisa, kommst du mit?|Lisa kommst, du mit?;Lisa kommst du, mit?;Lisa kommst du mit?|Nach der Anrede steht ein Komma.
+Welcher Satz ist richtig?|Wir gehen raus, weil die Sonne scheint.|Wir gehen raus weil, die Sonne scheint.;Wir gehen, raus weil die Sonne scheint.;Wir gehen raus weil die Sonne scheint.|
+Welcher Satz ist richtig?|Es ist spät, aber ich bin wach.|Es ist spät aber, ich bin wach.;Es ist, spät aber ich bin wach.;Es ist spät aber ich bin wach.|Vor „aber“ steht ein Komma.
+Welcher Satz ist richtig?|Wenn du willst, helfe ich dir.|Wenn du, willst helfe ich dir.;Wenn du willst helfe, ich dir.;Wenn du willst helfe ich dir.|
+Welcher Satz ist richtig?|Der Junge, der dort steht, ist mein Bruder.|Der Junge der dort steht, ist mein Bruder.;Der Junge, der dort steht ist mein Bruder.;Der Junge der dort steht ist mein Bruder.|Eingeschobener Nebensatz: zwei Kommas.
+Welcher Satz ist richtig?|Er ist klein, flink und mutig.|Er ist klein flink und mutig.;Er ist klein, flink, und mutig.;Er ist, klein flink und mutig.|
+Welcher Satz ist richtig?|Hallo Opa, wie geht es dir?|Hallo Opa wie, geht es dir?;Hallo Opa wie geht, es dir?;Hallo Opa wie geht es dir?|
+Welcher Satz ist richtig?|Sie liest, während er kocht.|Sie liest während, er kocht.;Sie, liest während er kocht.;Sie liest während er kocht.|
+`);
+pool5('k5_d_rede', 'Begleitsatz und Redezeichen beachten.', `
+Welcher Satz ist richtig?|Paul ruft: „Ich komme!“|Paul ruft „Ich komme!“;Paul ruft: Ich komme!;Paul ruft, „Ich komme!“|Vorangestellter Begleitsatz: Doppelpunkt.
+Welcher Satz ist richtig?|„Ich komme“, ruft Paul.|„Ich komme,“ ruft Paul.;„Ich komme“ ruft Paul.;„Ich komme“: ruft Paul.|Nachgestellt: Komma nach dem Schlusszeichen.
+Welcher Satz ist richtig?|„Kommst du?“, fragt Mia.|„Kommst du,“ fragt Mia?;„Kommst du“? fragt Mia.;„Kommst du“, fragt Mia?|
+Welcher Satz ist richtig?|„Heute“, sagt er, „habe ich frei.“|„Heute, sagt er, habe ich frei.“;„Heute“ sagt er „habe ich frei.“;„Heute“, sagt er: „Habe ich frei.“|Eingeschobener Begleitsatz.
+Welcher Satz ist richtig?|Mama fragt: „Hast du Hunger?“|Mama fragt: „Hast du Hunger“?;Mama fragt „Hast du Hunger?“;Mama fragt: Hast du Hunger?|
+Wie heißt der Satzteil „sagt Tom“?|Redebegleitsatz|Nebensatz mit weil;Satzreihe;Anrede||*Begleitsatz
+Welches Zeichen folgt auf einen vorangestellten Begleitsatz?|Doppelpunkt|Komma;Punkt;Semikolon||*
+Wo stehen die ersten Anführungszeichen im Deutschen?|unten|oben;in der Mitte;gar nicht|
+Welcher Satz ist richtig?|„Lauf!“, schreit der Trainer.|„Lauf“! schreit der Trainer.;„Lauf!“ schreit, der Trainer.;„Lauf,!“ schreit der Trainer.|
+`);
+
+/* Lesetexte (eigene Texte) */
+{
+  const LT5 = [
+    {txt: 'Der kleine Igel Pieks hatte den ganzen Herbst über gefressen. Käfer, Würmer und Schnecken waren seine Lieblingsspeisen. Als die ersten Nächte frostig wurden, suchte er sich einen Laubhaufen am Rand des Gartens. Dort rollte er sich zusammen und schlief ein. Erst im April wachte er wieder auf.',
+     q: [['Was fraß Pieks gern?', 'Käfer, Würmer und Schnecken', 'Äpfel und Nüsse;Gras und Heu;Brot und Käse'], ['Wo schlief Pieks?', 'in einem Laubhaufen', 'in einem Vogelhaus;in einer Garage;auf einem Baum'], ['Warum fraß er im Herbst so viel?', 'um Vorräte für den Winterschlaf anzulegen', 'weil ihm langweilig war;um schneller zu laufen;weil er im Winter mehr frisst']]},
+    {txt: 'Die Klasse 5b plant ein Sommerfest. Es findet am Freitag, dem 18. Juli, von 15 bis 18 Uhr auf dem Pausenhof statt. Jedes Kind soll etwas zum Essen oder Trinken mitbringen. Bei Regen wird in der Turnhalle gefeiert. Anmeldungen nimmt Frau Berger bis zum 10. Juli entgegen.',
+     q: [['Wo wird bei Regen gefeiert?', 'in der Turnhalle', 'im Klassenzimmer;auf dem Pausenhof;gar nicht'], ['Bis wann muss man sich anmelden?', 'bis zum 10. Juli', 'bis zum 18. Juli;bis 15 Uhr;bis Ende August'], ['Wie lange dauert das Fest?', 'drei Stunden', 'eine Stunde;fünf Stunden;den ganzen Tag']]},
+    {txt: 'Ein Fuchs sah einen Raben, der ein Stück Käse im Schnabel hielt. „Was für ein schöner Vogel du bist“, schmeichelte der Fuchs, „bestimmt singst du auch herrlich.“ Der Rabe fühlte sich geehrt und öffnete den Schnabel. Der Käse fiel herunter, und der Fuchs schnappte ihn sich.',
+     q: [['Wie bekommt der Fuchs den Käse?', 'durch Schmeicheleien', 'durch Klettern;durch einen Tausch;mit Gewalt'], ['Welche Eigenschaft des Raben nutzt der Fuchs aus?', 'seine Eitelkeit', 'seinen Fleiß;seinen Mut;seine Sparsamkeit'], ['Welche Lehre passt?', 'Trau nicht jedem, der dir schmeichelt.', 'Wer früh aufsteht, bekommt mehr.;Gemeinsam ist man stark.;Käse ist ungesund.']]},
+    {txt: 'Pinguine sind Vögel, die nicht fliegen können. Dafür sind sie ausgezeichnete Schwimmer. Ihre Flügel benutzen sie unter Wasser wie Paddel. Eine dicke Fettschicht und dicht stehende Federn schützen sie vor der Kälte. Beim Kaiserpinguin brütet das Männchen das Ei auf seinen Füßen aus.',
+     q: [['Wozu benutzen Pinguine ihre Flügel?', 'zum Schwimmen', 'zum Fliegen;zum Graben;zum Klettern'], ['Was schützt sie vor Kälte?', 'Fettschicht und Federn', 'dickes Fell;warme Höhlen;lange Beine'], ['Wer brütet beim Kaiserpinguin das Ei aus?', 'das Männchen', 'das Weibchen;beide gleichzeitig;niemand']]}
+  ];
+  const items = [];
+  LT5.forEach((t, i) => t.q.forEach((q, j) => items.push({i, j, txt: t.txt, q: q[0], ok: q[1], bad: q[2].split(';')})));
+  GEN.k5_d_lesen = diff => { const it = pick(items);
+    return MCX('k5_d_lesen', diff, `les-${it.i}-${it.j}`, `<div style="font-size:1rem;text-align:left;background:rgba(255,255,255,.08);padding:12px;border-radius:8px;margin-bottom:10px">${it.txt}</div>${it.q}`, it.ok, it.bad.slice(0, diff === 0 ? 2 : 3), ['Lies den Text noch einmal genau.', 'Markiere in Gedanken die Stelle, an der die Antwort steht.'], `Richtig ist: <b>${it.ok}</b>.`); };
+}
+pool5('k5_d_textsorten', 'Achte auf typische Merkmale der Textsorte.', `
+Womit beginnen viele Märchen?|Es war einmal …|Sehr geehrte Damen und Herren …;Heute in den Nachrichten …;Man nehme drei Eier …|
+Was ist typisch für ein Märchen?|Zauberei und der Sieg des Guten|genaue Zahlen und Fakten;Anleitungen zum Basteln;Wettervorhersagen|
+Wer handelt in einer Fabel meistens?|Tiere mit menschlichen Eigenschaften|nur Könige;Maschinen;Sportler|
+Was steht oft am Ende einer Fabel?|eine Lehre|ein Rezept;ein Inhaltsverzeichnis;eine Unterschrift||*Moral;Lehre
+Wie heißt ein Absatz im Gedicht?|Strophe|Kapitel;Szene;Spalte||*
+Wie heißt eine Zeile im Gedicht?|Vers|Strophe;Reim;Kapitel||*
+Wie nennt man den Gleichklang am Ende von Zeilen?|Reim|Vers;Takt;Absatz||*
+Welches Reimschema hat die Folge a a b b?|Paarreim|Kreuzreim;umarmender Reim;kein Reim||*
+Welches Reimschema hat die Folge a b a b?|Kreuzreim|Paarreim;umarmender Reim;Stabreim||*
+Was ist Lautmalerei?|Wörter ahmen Geräusche nach, z. B. „zisch“.|Wörter werden bunt geschrieben.;Sätze reimen sich nicht.;Man malt beim Vorlesen.|
+Welcher Text ist ein Sachtext?|ein Lexikonartikel über Wölfe|das Märchen vom Rotkäppchen;eine Fabel vom Fuchs;ein Liebesgedicht|
+`);
+pool5('k5_d_sprache', 'Überlege, ob etwas wörtlich oder bildlich gemeint ist.', `
+„Er ist stark wie ein Löwe.“ Welches Sprachbild ist das?|Vergleich|Reim;Lautmalerei;Anrede||*
+„Der Wind flüstert.“ Was passiert hier?|Etwas Unbelebtes handelt wie ein Mensch.|Es ist eine genaue Messung.;Es ist ein Reim.;Es ist Umgangssprache.|Personifikation.
+Was bedeutet „Tomaten auf den Augen haben“?|etwas Offensichtliches nicht sehen|Gemüse essen;rote Augen haben;gut sehen können|
+Was bedeutet „jemandem die Daumen drücken“?|ihm Glück wünschen|ihm wehtun;ihn begrüßen;mit ihm streiten|
+Welcher Satz ist Umgangssprache?|Ich hab echt null Bock.|Ich habe leider keine Lust.;Mir fehlt heute die Motivation.;Dazu habe ich wenig Neigung.|
+Welcher Satz passt in einen Brief an die Schulleitung?|Wir bitten Sie um Erlaubnis.|Ey, dürfen wir das?;Sag mal ja!;Na, geht klar, oder?|
+Was bedeutet das englische Fremdwort „cool“ in der Jugendsprache?|toll|heiß;langweilig;traurig|
+Was bedeutet „Download“?|das Herunterladen|das Hochladen;das Ausdrucken;das Löschen|
+Was bedeutet „Ticket“?|Eintritts- oder Fahrkarte|Koffer;Bahnsteig;Uhr|
+Was ist typisch für gesprochene Sprache?|Füllwörter und kurze Sätze|Absätze und Überschriften;Seitenzahlen;Fußnoten|
+Was bedeutet „Meeting“?|Treffen|Pause;Mahlzeit;Wettlauf|
+`);
+pool5('k5_d_schreiben', 'Denke an Aufbau, Zeitform und Leser.', `
+Wie ist eine Erlebniserzählung aufgebaut?|Einleitung, Hauptteil, Schluss|nur Hauptteil;Schluss, Einleitung, Hauptteil;Frage, Rechnung, Antwort|
+In welcher Zeit erzählt man schriftlich meist Erlebtes?|Präteritum|Präsens immer;Futur I;Befehlsform||*
+Wo steht der Höhepunkt einer Erzählung?|im Hauptteil|in der Überschrift;in der Einleitung;nach dem Gruß|
+In welcher Zeit beschreibt man ein Tier?|Präsens|Präteritum;Plusquamperfekt;Futur I||*
+Welches Verb ist am treffendsten für leises Gehen?|schleichen|gehen;machen;tun|
+Welches Wort macht eine Erzählung spannend?|plötzlich|außerdem nie;beziehungsweise;sozusagen|
+Was gehört an den Anfang eines Briefes?|Ort, Datum und Anrede|die Unterschrift;die Grußformel;das Postskriptum|
+Was steht am Ende eines Briefes?|Gruß und Unterschrift|die Anrede;die Überschrift;die Gliederung|
+Was hilft beim Planen eines Textes?|Ideensammlung und Schreibplan|sofort ohne Nachdenken schreiben;nur die Überschrift;den Schluss weglassen|
+Wie begründet man eine Meinung?|mit Argumenten und Beispielen|mit Lautstärke;mit vielen Ausrufezeichen;gar nicht|
+Was gehört zu einer genauen Beschreibung?|eine sinnvolle Reihenfolge und passende Adjektive|erfundene Abenteuer;wörtliche Rede;Reime|
+`);
+pool5('k5_d_medien', 'Überlege, was fair, verständlich und verlässlich ist.', `
+Was ist eine wichtige Gesprächsregel?|andere ausreden lassen|alle gleichzeitig reden;laut dazwischenrufen;wegschauen|
+Was hilft bei einem Kurzvortrag?|ein Stichwortzettel|den ganzen Text sehr schnell ablesen;auf den Boden schauen;flüstern|
+Wie sprichst du beim Vortragen am besten?|deutlich, mit Pausen und passendem Tempo|so schnell wie möglich;ganz leise;ohne Punkt und Komma|
+Wie gibt man gute Rückmeldung?|sachlich: erst das Gelungene, dann ein Tipp|nur auslachen;nur sagen „schlecht“;gar nicht zuhören|
+Welcher Text will vor allem zum Kaufen auffordern?|Werbung|Lexikonartikel;Märchen;Fahrplan||*
+Welcher Text will vor allem informieren?|Nachricht|Werbeplakat;Fantasiegeschichte;Witz||*
+Wo schlägst du Fakten verlässlich nach?|in einem Lexikon|in einem Gerücht;in einer Werbung;in einem Witzebuch|
+Wie findest du in der Bibliothek ein Buch am besten?|mit dem Katalog nach Titel oder Autor|durch Raten;nach der Farbe;nach dem Gewicht|
+Woran erkennst du eine vertrauenswürdige Internetseite eher?|Der Verfasser ist genannt und die Angaben lassen sich prüfen.|Sie blinkt bunt.;Sie verspricht Gewinne.;Sie verlangt sofort dein Passwort.|
+Womit erzeugt ein Film oft Spannung?|mit Musik und Nahaufnahmen|mit dem Abspann;mit der Altersangabe;mit der Werbepause|
+`);
+
+/* --- Englisch 5 --- */
+isl5('englisch', 'k5e1', 1, 'Nomen, Artikel und Pronomen', 'Wörter-Insel', '🔡', '#ff9d4d', '#d6402f', 'e1', [
+  ['k5_e_plural', 'Plural', 'Plural-Pier', '👯', 'comp'],
+  ['k5_e_artikel', 'a, an, the und this/that', 'Artikel-Atoll', '👉', 'quant'],
+  ['k5_e_genitiv', '’s und of', 'Besitz-Bucht', '🔑', 'poss'],
+  ['k5_e_pron', 'Personalpronomen', 'Pronomen-Pfad', '👥', 'pron'],
+  ['k5_e_poss', 'Possessivbegleiter und Fragewörter', 'Mein-Dein-Mole', '❓', 'poss'],
+  ['k5_e_menge', 'how much, how many', 'Mengen-Mühle', '⚖️', 'quant']
+]);
+isl5('englisch', 'k5e2', 2, 'Verben und Zeiten', 'Zeiten-Insel', '⏳', '#ff7aa8', '#c4306a', 'e2', [
+  ['k5_e_be', 'to be und have got', 'Be-Basis', '🐝', 'gr_perfect'],
+  ['k5_e_sp', 'Simple Present', 'Gewohnheits-Garten', '🔁', 'gr_sp'],
+  ['k5_e_pp', 'Present Progressive', 'Jetzt-Jetty', '🏃', 'gr_prog'],
+  ['k5_e_kontrast', 'Simple oder Progressive', 'Kontrast-Krater', '🌋', 'gr_sp'],
+  ['k5_e_past', 'Simple Past', 'Past-Pier', '⚓', 'gr_past'],
+  ['k5_e_modal', 'can, could, may, must, should', 'Modal-Mine', '💪', 'gr_future']
+]);
+isl5('englisch', 'k5e3', 3, 'Sätze bauen und verstehen', 'Satz-Insel', '🛠️', '#b36bff', '#5a2fcf', 'e4', [
+  ['k5_e_fragen', 'Fragen, Kurzantworten und Verneinung', 'Frage-Fjord', '❓', 'satzbau'],
+  ['k5_e_ordnung', 'Wortstellung und Häufigkeit', 'Satzbau-Station', '🏗️', 'satzbau'],
+  ['k5_e_praep', 'Präpositionen und Bindewörter', 'Wegweiser-Wald', '🧭', 'voc_way'],
+  ['k5_e_phrases', 'Redewendungen für Alltag und Unterricht', 'Klassenzimmer-Camp', '🙋', 'asas'],
+  ['k5_e_hoeren', 'Hörverstehen', 'Hör-Höhle', '🎧', 'hoeren']
+]);
+isl5('englisch', 'k5e4', 4, 'Themenwortschatz', 'Welten-Insel', '🌍', '#4fd5ff', '#2468d8', 'e3', [
+  ['k5_v_school', 'School', 'Schul-Siedlung', '🏫', 'voc_london'],
+  ['k5_v_home', 'Family, home and pets', 'Home-Hügel', '🏠', 'voc_uk'],
+  ['k5_v_food', 'Food, clothes and shopping', 'Shopping-Strand', '🛒', 'voc_usa'],
+  ['k5_v_free', 'Free time and health', 'Freizeit-Fjord', '⚽', 'voc_leisure'],
+  ['k5_v_numbers', 'Numbers, dates and time', 'Zahlen-Zinnen', '🕒', 'voc_media'],
+  ['k5_v_britain', 'Great Britain and English in the world', 'Britain-Beach', '🇬🇧', 'voc_london']
+]);
+const EN5 = 'Welches Wort passt in die Lücke?';
+gap5('k5_e_plural', 'Setze die Mehrzahl ein:', `
+one box, two ___|boxes|boxs;boxies;box|Nach x hängt man -es an.
+one baby, two ___|babies|babys;babyes;baby|Konsonant + y wird zu -ies.
+one child, three ___|children|childs;childes;childrens|Unregelmäßiger Plural.
+one man, two ___|men|mans;mens;manes|Unregelmäßig.
+one woman, two ___|women|womans;womens;womanes|Unregelmäßig.
+one mouse, two ___|mice|mouses;mices;mouse|Unregelmäßig.
+one foot, two ___|feet|foots;feets;footes|Unregelmäßig.
+one tooth, many ___|teeth|tooths;teeths;toothes|Unregelmäßig.
+one watch, two ___|watches|watchs;watchies;watch|Nach ch kommt -es.
+one knife, two ___|knives|knifes;knifies;knive|f wird zu v.
+one tomato, two ___|tomatoes|tomatos;tomatoies;tomato|Hier kommt -es.
+one day, seven ___|days|daies;dayes;day|Vokal + y: nur -s.
+`);
+gap5('k5_e_artikel', EN5, `
+She has got ___ apple.|an|a;am;and|Vor einem Vokallaut steht an.
+He is ___ teacher.|a|an;the one;at|Vor einem Konsonantenlaut steht a.
+It takes ___ hour. (one)|an|a;am;at|Das h in hour ist stumm.
+I have ___ new bike.|a|an;am;as|
+___ sun is hot today.|The|A;An;This one|Es gibt nur eine Sonne.
+Look at ___ book here in my hand.|this|that;these;those|Nah und Einzahl: this.
+Look at ___ bird over there.|that|this;these;those|Fern und Einzahl: that.
+___ shoes here are mine.|These|This;That;Those|Nah und Mehrzahl: these.
+___ mountains far away are high.|Those|This;That;These|Fern und Mehrzahl: those.
+We eat ___ orange every day.|an|a;am;at|
+`, true);
+gap5('k5_e_genitiv', EN5, `
+This is ___ bike. (das Rad von Tom)|Tom's|Toms;Tom;of Tom|Bei Personen: 's.
+These are my ___ toys. (eine Schwester)|sister's|sisters;sister;sisteres|Einzahl: 's.
+The ___ room is big. (zwei Brüder teilen es)|brothers'|brother's;brothers;brotheres|Mehrzahl auf s: Apostroph dahinter.
+The ___ bags are red. (die Kinder)|children's|childrens';childrens;childs'|Unregelmäßiger Plural: 's.
+the roof ___ the house|of|from;off;at|Bei Dingen nimmt man of.
+the end ___ the film|of|off;from;by|
+It is my ___ car. (Vater)|dad's|dads;dad;dads'|
+the name ___ the street|of|off;to;on|
+This is the ___ basket. (eine Katze)|cat's|cats;cat;cates|
+at the top ___ the page|of|off;by;from|
+`);
+gap5('k5_e_pron', 'Welches Pronomen passt?', `
+Anna is nice. ___ is my friend.|She|He;It;Her|Anna ist weiblich, Subjekt.
+Ben is ten. ___ likes football.|He|She;Him;His|
+The dog is hungry. Give ___ some food.|it|they;its;them|Ein Tier, Objekt.|him;her
+My parents are at home. ___ are cooking.|They|Them;Their;We|
+This is Mia. I like ___.|her|she;hers;he|Objektform.
+Where is Tom? I can't see ___.|him|he;his;her|Objektform.
+Sam and I are friends. ___ play together.|We|Us;Our;They|
+Can you help ___, please? (mir)|me|I;my;mine|
+Look at those girls. Do you know ___?|them|they;their;theirs|
+Mum is calling ___. (uns)|us|we;our;ours|
+I have a question for ___, Peter. (dich)|you|your;yours;u|
+`, true);
+gap5('k5_e_poss', EN5, `
+I love ___ dog. (mein)|my|me;I;mine|
+Is this ___ pencil? (dein)|your|you;yours;you're|
+He is doing ___ homework. (seine)|his|he;him;her|
+She can't find ___ shoes. (ihre)|her|she;hers;he|
+We like ___ school. (unsere)|our|us;we;ours|
+The children are in ___ room. (ihrem)|their|there;they;them|
+The cat is licking ___ paw. (ihre, Tier)|its|it's;it;it is|Das Pronomen zu it.|her;his
+___ is your name?|What|Who;Where;When|Was oder wie.
+___ do you live?|Where|What;Who;When|Wo.
+___ is your birthday?|When|Where;Who;What colour|Wann.
+___ is that boy? – That's Leo.|Who|Where;When;How|Wer.
+___ old are you?|How|What;Who;When|Wie alt.
+___ are you late? – Because I missed the bus.|Why|Who;Where;Which|Warum.
+`, true);
+gap5('k5_e_menge', EN5, `
+How ___ money have you got?|much|many;lot;more of|money ist unzählbar.
+How ___ brothers have you got?|many|much;lot;more of|brothers ist zählbar.
+How ___ milk do we need?|much|many;few;lot|
+How ___ apples are there?|many|much;little;lot|
+There isn't ___ water in the bottle.|much|many;a;few||any
+There aren't ___ chairs here.|many|much;a;little||any
+How ___ time have we got?|much|many;few;lots|
+How ___ pages has the book?|many|much;little;lot|
+I'd like a glass ___ juice.|of|off;from;with|
+How ___ is this T-shirt? – Ten pounds.|much|many;old;long|Preisfrage.
+`, true);
+gap5('k5_e_be', EN5, `
+I ___ eleven years old.|am|is;are;be|
+She ___ in my class.|is|am;are;be|
+We ___ happy.|are|is;am;be|
+___ you from Germany?|Are|Is;Am;Do|
+They ___ at school yesterday.|were|was;are;be|Vergangenheit Mehrzahl.
+I ___ at home last night.|was|were;am;is|
+He ___ got a new phone.|has|have;is;are|he, she, it: has got.
+We ___ got two cats.|have|has;are;do|
+___ she got a sister?|Has|Have;Is;Does|
+I ___ not got a pet.|have|has;am;do|
+There ___ three books on the desk.|are|is;am;be|
+There ___ a ball under the bed.|is|are;am;be|
+`, true);
+gap5('k5_e_sp', 'Setze das Verb im Simple Present ein:', `
+He ___ football every Monday. (play)|plays|play;playing;played|he, she, it – das s muss mit.
+I ___ to school by bike. (go)|go|goes;going;went|
+She ___ TV in the evening. (watch)|watches|watch;watchs;watching|Nach ch: -es.
+Tom ___ his homework after lunch. (do)|does|do;dos;doing|
+They ___ in London. (live)|live|lives;living;lived|
+My mum ___ in a shop. (work)|works|work;working;worked|
+The bird ___ high. (fly)|flies|flys;fly;flying|y wird zu ies.
+We ___ breakfast at seven. (have)|have|has;having;had|
+He ___ a lot of books. (read)|reads|read;reading;readed|
+She ___ to music every day. (listen)|listens|listen;listening;listened|
+My dog ___ a lot. (sleep)|sleeps|sleep;sleeping;slept|
+`);
+gap5('k5_e_pp', 'Setze das Present Progressive ein:', `
+Look! The boy ___. (run)|is running|runs;is runing;running|am/is/are + -ing.
+I ___ a letter now. (write)|am writing|write;am writeing;writing|Stummes e fällt weg.
+They ___ in the pool at the moment. (swim)|are swimming|swim;are swiming;is swimming|m verdoppeln.
+She ___ lunch right now. (make)|is making|makes;is makeing;are making|
+We ___ to the radio. (listen)|are listening|listen;is listening;listening|
+Listen! Someone ___. (sing)|is singing|sings;are singing;singing|
+The cat ___ on the sofa now. (sit)|is sitting|sits;is siting;sitting|t verdoppeln.
+You ___ very fast today. (talk)|are talking|talk;is talking;talking|
+Dad ___ the car at the moment. (wash)|is washing|washes;are washing;washing|
+The girls ___ now. (dance)|are dancing|dance;are danceing;is dancing|
+`);
+gap5('k5_e_kontrast', 'Simple Present oder Present Progressive?', `
+She usually ___ at seven. (get up)|gets up|is getting up;get up;getting up|usually: Gewohnheit.
+Look! It ___. (rain)|is raining|rains;rain;raining|Look!: gerade jetzt.
+He ___ tennis every Friday. (play)|plays|is playing;play;playing|every Friday.
+Be quiet! The baby ___. (sleep)|is sleeping|sleeps;sleep;sleeping|
+We often ___ to the park. (go)|go|are going;goes;going|often.
+I ___ my homework at the moment. (do)|am doing|do;does;doing|at the moment.
+Dogs ___ meat. (like)|like|are liking;likes;liking|Allgemeine Aussage.
+Listen! The phone ___. (ring)|is ringing|rings;ring;ringing|
+My sister never ___ coffee. (drink)|drinks|is drinking;drink;drinking|never.
+They ___ a film right now. (watch)|are watching|watch;watches;watching|right now.
+`);
+gap5('k5_e_past', 'Setze das Verb im Simple Past ein:', `
+Yesterday I ___ football. (play)|played|play;plaied;plays|Regelmäßig: -ed.
+She ___ to London last year. (go)|went|goed;goes;gone|go – went.
+We ___ a film last night. (see)|saw|seed;seen;sees|see – saw.
+He ___ his room on Saturday. (tidy)|tidied|tidyed;tidies;tidy|y wird zu ied.
+They ___ home late. (come)|came|comed;come;comes|come – came.
+I ___ a sandwich for lunch. (eat)|ate|eated;eaten;eats|eat – ate.
+Tom ___ a new bike. (get)|got|getted;gets;get|get – got.
+The bus ___ at the station. (stop)|stopped|stoped;stops;stop|p verdoppeln.
+She ___ me a letter. (write)|wrote|writed;written;writes|write – wrote.
+We ___ lots of fun. (have)|had|haved;has;have|have – had.
+Mum ___ a cake. (make)|made|maked;makes;make|make – made.
+He ___ TV after dinner. (watch)|watched|watch;watches;watchd|
+`);
+gap5('k5_e_modal', EN5, `
+I ___ swim, I learned it last summer.|can|must;may not;should not|Fähigkeit.
+Fish ___ walk.|can't|must;should;may|Unmöglich.|cannot
+___ I open the window, please?|May|Must;Should not;Am|Höflich um Erlaubnis bitten.
+You ___ be quiet in the library. (müssen)|must|can;may;could||have to
+You ___ eat more fruit. It is healthy. (solltest)|should|can't;couldn't;may not|Ratschlag.
+When I was three, I ___ read. (konnte nicht)|couldn't|can't;mustn't;shouldn't|Vergangenheit.|could not
+When she was five, she ___ ride a bike. (konnte)|could|can;must;may|
+You ___ run across the street! (darfst nicht)|mustn't|needn't;may;can|Verbot.|must not
+It is late. We ___ go home now. (müssen)|must|may not;couldn't;can't||have to;should
+You ___ see a doctor if it hurts. (solltest)|should|couldn't;mustn't;can't|
+`, true);
+gap5('k5_e_fragen', EN5, `
+___ you like pizza?|Do|Does;Are;Is|Mit you: do.|Did
+___ she play the piano?|Does|Do;Is;Are|he, she, it: does.|Did
+I ___ like spiders. (heute)|don't|doesn't;am not;isn't||do not
+He ___ eat fish. (nie, auch heute nicht)|doesn't|don't;isn't;aren't||does not
+___ they go to your school yesterday?|Did|Do;Does;Were|Vergangenheit: did.
+We ___ watch TV last night.|didn't|don't;doesn't;weren't||did not
+Do you like tea? – Yes, I ___.|do|am;does;like it do|Kurzantwort.
+Is he your brother? – No, he ___.|isn't|doesn't;don't;aren't||is not
+Can you swim? – Yes, I ___.|can|do;am;swim|
+___ touch the oven!|Don't|Not;Doesn't;No|Verneinter Imperativ.|Do not
+Are you ready? – No, I'm ___.|not|no;don't;never be|
+Does Tom live here? – Yes, he ___.|does|do;is;lives yes|
+`, true);
+gap5('k5_e_praep', EN5, `
+The lesson starts ___ eight o'clock.|at|in;on;to|Uhrzeit: at.
+My birthday is ___ May.|in|on;at;to|Monat: in.
+We have P.E. ___ Monday.|on|in;at;to|Wochentag: on.
+The cat is ___ the table. (unter)|under|on;over;next to|
+The book is ___ the bag. (in)|in|on;at;to|
+He sits ___ to me.|next|near of;by of;side|next to = neben.
+I like apples ___ bananas.|and|but;because;or not|
+I am small, ___ I am fast.|but|because;or;so that not|Gegensatz.
+She is happy ___ it is sunny.|because|but;or;than|Begründung.
+Would you like tea ___ juice?|or|but;because;than|Auswahl.
+We arrived just ___ time for the film.|in|at;on;to|in time = rechtzeitig.
+`, true);
+pool5('k5_e_ordnung', 'Subjekt – Verb – Objekt; Häufigkeit vor dem Vollverb, aber nach be.', `
+Welcher Satz ist richtig? „Ich spiele oft Tennis.“|I often play tennis.|I play often tennis.;Often play I tennis.;I play tennis often I.|Häufigkeit steht vor dem Vollverb.
+Welcher Satz ist richtig? „Sie ist immer nett.“|She is always nice.|She always is nice.;Always she nice is.;She is nice always is.|Nach be steht das Adverb.
+Welcher Satz ist richtig? „Wir gehen nie zu Fuß.“|We never walk.|We walk never we.;Never walk we.;We walk not never.|
+Welcher Satz ist richtig? „Er liest abends ein Buch.“|He reads a book in the evening.|He reads in the evening a book.;In the evening reads he a book.;He a book reads in the evening.|Subjekt – Verb – Objekt.
+Welcher Satz ist richtig? „Gestern traf ich Tom im Park.“|I met Tom in the park yesterday.|I met yesterday Tom in the park.;Yesterday met I Tom in the park.;I Tom met in the park yesterday.|Ort vor Zeit.
+Welcher Satz ist richtig? „Wo wohnst du?“|Where do you live?|Where live you?;Where you do live?;Do where you live?|Fragewort – do – Subjekt – Verb.
+Welcher Satz ist richtig? „Magst du Musik?“|Do you like music?|Like you music?;You do like music?;Do like you music?|
+Welcher Satz ist richtig? „Meine Mutter trinkt manchmal Kaffee.“|My mum sometimes drinks coffee.|My mum drinks sometimes coffee.;Sometimes drinks my mum coffee.;My mum coffee sometimes drinks.|
+Welcher Satz ist richtig? „Was machst du gerade?“|What are you doing?|What you are doing?;What do you doing?;What doing are you?|
+`);
+pool5('k5_e_phrases', 'Überlege, in welcher Situation man das sagt.', `
+Was sagst du, wenn du etwas nicht verstanden hast?|Sorry, can you say that again, please?|I am very hungry.;Goodbye, see you.;Here you are.|
+Was sagst du, wenn du jemandem etwas gibst?|Here you are.|Where are you?;Who are you?;Nice to meet you.|
+Wie fragst du, wie es jemandem geht?|How are you?|Who are you?;How old are you?;Where are you?|
+Du triffst jemanden zum ersten Mal. Was sagst du?|Nice to meet you.|See you later.;Never mind.;Good night.|
+Wie entschuldigst du dich?|I'm sorry.|You're welcome.;Well done.;Cheers to you.|
+Jemand sagt „Thank you“. Was antwortest du?|You're welcome.|I'm sorry.;How are you?;Not at school.|
+Wie bittest du darum, zur Toilette gehen zu dürfen?|May I go to the toilet, please?|Where do you live?;Can you swim?;What's the toilet time?|
+Was bedeutet „Open your books, please“?|Öffnet bitte eure Bücher.|Schließt bitte eure Bücher.;Holt bitte eure Hefte.;Lest bitte lauter.|
+Was bedeutet „Work with a partner“?|Arbeitet zu zweit.|Arbeitet allein.;Geht in die Pause.;Meldet euch.|
+Wie fragst du nach der Uhrzeit?|What time is it?|How many times?;When are you?;What is the clock old?|
+Was heißt „Wie sagt man das auf Englisch?“|What's that in English?|Do you speak this?;How is English?;Can English say you?|
+`);
+voc5('k5_v_school', 'pupil=Schüler; teacher=Lehrer; classroom=Klassenzimmer; timetable=Stundenplan; homework=Hausaufgabe; break=Pause; pencil case=Federmäppchen; ruler=Lineal; rubber=Radiergummi; board=Tafel; desk=Schreibtisch; schoolbag=Schultasche; subject=Schulfach; lesson=Unterrichtsstunde; exercise book=Heft; scissors=Schere; glue=Klebstoff; classmate=Mitschüler; canteen=Kantine; library=Bücherei; uniform=Schuluniform; bus stop=Bushaltestelle');
+voc5('k5_v_home', 'mother=Mutter; father=Vater; sister=Schwester; brother=Bruder; grandmother=Großmutter; uncle=Onkel; aunt=Tante; cousin=Cousin; parents=Eltern; kitchen=Küche; bedroom=Schlafzimmer; bathroom=Badezimmer; living room=Wohnzimmer; garden=Garten; stairs=Treppe; window=Fenster; wardrobe=Kleiderschrank; shelf=Regal; rabbit=Kaninchen; tortoise=Schildkröte; guinea pig=Meerschweinchen; neighbour=Nachbar');
+voc5('k5_v_food', 'bread=Brot; butter=Butter; cheese=Käse; vegetables=Gemüse; strawberry=Erdbeere; meat=Fleisch; juice=Saft; breakfast=Frühstück; dinner=Abendessen; menu=Speisekarte; jacket=Jacke; trousers=Hose; skirt=Rock; socks=Socken; shirt=Hemd; coat=Mantel; shop=Geschäft; price=Preis; change=Wechselgeld; pocket money=Taschengeld; cheap=billig; expensive=teuer');
+voc5('k5_v_free', 'hobby=Hobby; football=Fußball; swimming pool=Schwimmbad; riding=Reiten; reading=Lesen; drawing=Zeichnen; game=Spiel; friend=Freund; holidays=Ferien; trip=Ausflug; cinema=Kino; museum=Museum; head=Kopf; arm=Arm; leg=Bein; stomach=Magen; tooth=Zahn; ill=krank; healthy=gesund; headache=Kopfschmerzen; doctor=Arzt; tired=müde');
+voc5('k5_v_numbers', 'twelve=zwölf; thirteen=dreizehn; twenty=zwanzig; thirty=dreißig; hundred=hundert; thousand=tausend; first=erste; second=zweite; third=dritte; fifth=fünfte; Tuesday=Dienstag; Wednesday=Mittwoch; Thursday=Donnerstag; January=Januar; October=Oktober; week=Woche; month=Monat; year=Jahr; half past=halb nach; quarter=Viertel; midnight=Mitternacht; today=heute');
+pool5('k5_v_britain', 'Denke an die Britischen Inseln.', `
+Was ist die Hauptstadt von England?|London|Dublin;Edinburgh;Cardiff||*
+Was ist die Hauptstadt von Schottland?|Edinburgh|London;Glasgow;Belfast||*
+Was ist die Hauptstadt von Wales?|Cardiff|Swansea;London;Dublin||*
+Was ist die Hauptstadt von Nordirland?|Belfast|Dublin;Cardiff;York||*
+Was ist die Hauptstadt der Republik Irland?|Dublin|Belfast;Cork;Cardiff||*
+Welche Länder gehören zu Großbritannien?|England, Schottland und Wales|England, Irland und Frankreich;nur England;Schottland, Irland und Island|Zum Vereinigten Königreich gehört außerdem Nordirland.
+Welcher Fluss fließt durch London?|Themse|Seine;Donau;Rhein||*Thames
+Wie heißt die britische Währung?|Pound|Euro;Dollar;Franc||*Pfund
+Wie heißt die Flagge des Vereinigten Königreichs?|Union Jack|Stars and Stripes;Tricolore;Maple Leaf||*
+Auf welcher Straßenseite fährt man in Großbritannien?|links|rechts;in der Mitte;beliebig||*
+In welchem Land ist Englisch eine wichtige Sprache?|Australien|Brasilien;Japan;Türkei|
+Welches Meer oder welcher Meeresarm trennt England von Frankreich?|der Ärmelkanal|die Ostsee;das Schwarze Meer;die Adria|
+`);
+{
+  const W = ['school', 'teacher', 'friend', 'house', 'garden', 'apple', 'water', 'window', 'family', 'mother', 'brother', 'sister', 'kitchen', 'bread', 'jacket', 'football', 'holiday', 'museum', 'breakfast', 'Tuesday', 'yellow', 'green'];
+  const S = ['I like my school', 'This is my brother', 'We have got a dog', 'She is in the garden', 'He plays football', 'Can I have some water', 'My bag is blue', 'It is half past seven', 'They live in London', 'I get up at seven', 'Open your books please', 'Where is the library'];
+  const tips = ['Du kannst dir das Gehörte mit dem Knopf „Nochmal anhören“ beliebig oft vorspielen.', 'Achte auf die Endungen und auf die Schreibweise.'];
+  GEN.k5_e_hoeren = diff => {
+    if (diff === 0) { const w = pick(W), bad = shuf(W.filter(x => x !== w)).slice(0, 3); return MC('k5_e_hoeren', 0, `h50-${w}`, 'Welches Wort hörst du?', w, bad, tips, `Das Wort war <b>${w}</b>.`, {speak: w}); }
+    if (diff === 1) { const w = pick(W); return TXT('k5_e_hoeren', 1, `h51-${w}`, 'Schreibe das Wort auf, das du hörst.', w, [], tips, `Das Wort war <b>${w}</b>.`, {speak: w}); }
+    const s = pick(S); return TXT('k5_e_hoeren', 2, `h52-${s}`, 'Schreibe den Satz auf, den du hörst. (Satzzeichen musst du nicht schreiben.)', s, [], tips, `Der Satz war: <b>${s}.</b>`, {speak: s});
+  };
+}
+
+/* --- Geografie 5 --- */
+isl5('geo', 'k5o1', 1, 'Einführung und Karten', 'Karten-Insel', '🗺️', '#7fe36a', '#2f9e44', 'o1', [
+  ['k5_o_fach', 'Das Fach Geografie', 'Entdecker-Eck', '🔎', 'o_hoehen'],
+  ['k5_o_karten', 'Karten, Atlas und Luftbilder', 'Atlas-Alm', '📘', 'o_hoehen'],
+  ['k5_o_orient', 'Orientierung und Maßstab', 'Kompass-Kap', '🧭', 'o_himmel']
+]);
+isl5('geo', 'k5o2', 2, 'Planet Erde', 'Weltraum-Insel', '🪐', '#8aa0ff', '#3a3fb0', 'o4', [
+  ['k5_o_sonnensystem', 'Weltall und Sonnensystem', 'Planeten-Port', '🪐', 'o_erde'],
+  ['k5_o_bewegung', 'Erdbewegungen und Raumfahrt', 'Raketen-Rampe', '🚀', 'o_erde'],
+  ['k5_o_aufbau', 'Der blaue Planet: Aufbau und Alter', 'Schalen-Schlucht', '🌍', 'o_gradnetz']
+]);
+isl5('geo', 'k5o3', 3, 'Gestalt und Gliederung der Erde', 'Globus-Insel', '🌐', '#7fd0ff', '#2a74d6', 'o3', [
+  ['k5_o_kontinente', 'Kontinente und Ozeane', 'Kontinent-Küste', '🌊', 'o_gewaesser'],
+  ['k5_o_gradnetz', 'Gradnetz der Erde', 'Gradnetz-Garten', '🌐', 'o_gradnetz'],
+  ['k5_o_extrem', 'Extreme Lebensräume', 'Polar-Pass', '🐧', 'o_klima']
+]);
+isl5('geo', 'k5o4', 4, 'Veränderung der Erdoberfläche', 'Vulkan-Insel', '🌋', '#ffb347', '#d6402f', 'g1', [
+  ['k5_o_vulkan', 'Vulkane, Erdbeben und Gebirge', 'Lava-Lager', '🌋', 'o_euphysisch'],
+  ['k5_o_gestein', 'Kreislauf der Gesteine', 'Gesteins-Grube', '🪨', 'o_landschaft'],
+  ['k5_o_erosion', 'Wasser, Wind und Temperatur', 'Erosions-Ebene', '💨', 'o_wetter'],
+  ['k5_o_mensch', 'Der Mensch verändert die Erde', 'Umwelt-Ufer', '♻️', 'o_wirtschaft']
+]);
+isl5('geo', 'k5o5', 5, 'Deutschland und Bayern', 'Heimat-Insel', '🥨', '#ffd36b', '#d98a1c', 'o2', [
+  ['k5_o_laender', 'Politische Gliederung Deutschlands', 'Länder-Lichtung', '🏙️', 'o_bundesland'],
+  ['k5_o_bayern', 'Bayern', 'Weißblau-Wiese', '🥨', 'o_bayern'],
+  ['k5_o_natur', 'Großlandschaften', 'Landschafts-Lounge', '🏞️', 'o_landschaft'],
+  ['k5_o_nutzung', 'Nutzung und Schutzgebiete', 'Nationalpark-Nest', '🌲', 'b_schutz']
+]);
+isl5('geo', 'k5o6', 6, 'Mein Nahraum', 'Stadt-Insel', '🏘️', '#c8a0ff', '#6a3fd0', 'g4', [
+  ['k5_o_stadt', 'Stadt, Umland und Grundbedürfnisse', 'Altstadt-Allee', '🏰', 'o_hauptstadt']
+]);
+
+pool5('k5_o_fach', 'Geografie untersucht Räume, Natur und Menschen.', `
+Womit beschäftigt sich die Geografie?|mit Räumen, Natur und Menschen auf der Erde|nur mit Zahlen;nur mit Sprachen;nur mit Pflanzenzellen|
+Wie nennt man ein verkleinertes, kugelförmiges Modell der Erde?|Globus|Atlas;Kompass;Teleskop||*
+Welches Bild zeigt eine Landschaft schräg von oben?|Schrägluftbild|Senkrechtluftbild;Stadtplan;Diagramm||*
+Welches Bild zeigt eine Landschaft genau von oben?|Senkrechtluftbild|Schrägluftbild;Panorama vom Boden;Gemälde||*
+Was ist ein digitales Geomedium?|eine Kartenanwendung im Internet|ein Holzglobus;ein Gesteinsbrocken;ein Lineal|
+Welcher Vorteil gehört zum Globus?|Er zeigt die Erde fast ohne Verzerrung.|Er passt flach in jedes Heft.;Er zeigt jede Straße.;Er zeigt das Wetter von morgen.|
+Welche Frage ist typisch geografisch?|Warum wohnen an diesem Fluss so viele Menschen?|Wie rechnet man Brüche?;Wie bildet man das Perfekt?;Wie viele Zähne hat ein Hund?|
+Was tut man zuerst, wenn man ein Bild auswertet?|beschreiben, was man sieht|sofort raten;das Bild übermalen;nur den Rahmen messen|
+`);
+pool5('k5_o_karten', 'Denke an Legende, Maßstab und Kartenart.', `
+Was erklärt die Legende?|die Zeichen und Farben der Karte|die Geschichte des Zeichners;das Wetter;den Preis|||
+Wie heißt eine Sammlung von Karten als Buch?|Atlas|Globus;Lexikon;Kalender||*
+Welche Karte zeigt Höhen, Flüsse und Gebirge?|physische Karte|politische Karte;Fahrplan;Klimadiagramm|
+Welche Karte zeigt Staaten und Grenzen?|politische Karte|physische Karte;Bodenkarte;Wetterkarte|
+Welche Karte stellt ein besonderes Thema dar, etwa Bevölkerung?|thematische Karte|Wanderkarte ohne Zeichen;Sternkarte;Globus||*
+Welche Farbe zeigt auf physischen Karten meist Tiefland?|Grün|Braun;Weiß;Rot|
+Welche Farbe zeigt auf physischen Karten meist hohe Gebirge?|Braun|Grün;Blau;Gelbgrün|
+Was verrät der Maßstab?|wie stark die Wirklichkeit verkleinert ist|wie alt die Karte ist;wer die Karte gekauft hat;wie schwer sie ist|
+Wie heißt ein bekanntes freies Kartenprojekt im Internet?|OpenStreetMap|Wikipedia;LibreOffice;Scratch|
+Woraus entsteht eine Karte oft?|aus Luftbildern, die vereinfacht gezeichnet werden|aus Märchen;aus Rechnungen allein;aus Tönen|
+Womit findet man im Atlas schnell einen Ort?|mit dem Register|mit dem Umschlagbild;mit der Seitenfarbe;mit dem Preisschild||*Namensverzeichnis
+`);
+pool5('k5_o_orient', 'Norden ist auf Karten meist oben.', `
+Wo geht die Sonne auf?|im Osten|im Westen;im Norden;im Süden|
+Wo steht die Mittagssonne in Deutschland?|im Süden|im Norden;im Osten;im Westen|
+Welche Richtung liegt zwischen Süden und Osten?|Südosten|Südwesten;Nordosten;Nordwesten||*
+Welche Richtung liegt gegenüber von Westen?|Osten|Norden;Süden;Nordwesten||*
+Was zeigt die Kompassnadel ungefähr an?|Norden|Süden;die Uhrzeit;die Höhe||*
+Maßstab 1 : 100 000: Wie lang ist 1 cm in Wirklichkeit?|1 km|100 m;10 km;100 km|
+Welcher Maßstab zeigt mehr Einzelheiten?|1 : 10 000|1 : 1 000 000;1 : 500 000;1 : 10 000 000|Kleine Zahl hinter dem Doppelpunkt: großer Maßstab.
+Maßstab 1 : 50 000: Wie weit sind 4 cm in Wirklichkeit?|2 km|200 m;20 km;4 km|
+Was ist eine Landmarke?|ein auffälliger Punkt zur Orientierung|eine Briefmarke;eine Grenze auf dem Mond;ein Maßstab|
+Welche Angabe zeigt die Höhe eines Berges?|Meter über dem Meeresspiegel|Kilogramm;Liter;Grad Celsius|
+`);
+pool5('k5_o_sonnensystem', 'Die Sonne ist ein Stern, Planeten kreisen um sie.', `
+Was ist die Sonne?|ein Stern|ein Planet;ein Mond;ein Komet||*
+Wie viele Planeten hat unser Sonnensystem?|8|7;9;12|
+Welcher Planet ist der Sonne am nächsten?|Merkur|Venus;Mars;Jupiter||*
+Welcher Planet ist der größte?|Jupiter|Saturn;Erde;Neptun||*
+Welcher Planet ist von der Sonne aus der dritte?|Erde|Mars;Venus;Merkur||*
+Welcher Planet wird „roter Planet“ genannt?|Mars|Venus;Jupiter;Uranus||*
+Welcher Planet hat besonders auffällige Ringe?|Saturn|Merkur;Venus;Mars||*
+Was ist der Mond?|ein natürlicher Begleiter der Erde|ein Stern;ein Planet mit eigenem Licht;ein Satellit aus Metall|
+Wie heißt unsere Galaxie?|Milchstraße|Andromeda;Sonnensystem;Orion||*
+Was leuchtet selbst?|ein Stern|ein Planet;ein Mond;ein Raumschiff-Schatten|
+`);
+pool5('k5_o_bewegung', 'Unterscheide Drehung um die Achse und Umlauf um die Sonne.', `
+Wie lange braucht die Erde für eine Drehung um sich selbst?|etwa 24 Stunden|etwa 12 Stunden;etwa 30 Tage;etwa 365 Tage|
+Wie lange braucht die Erde für einen Umlauf um die Sonne?|etwa ein Jahr|etwa einen Tag;etwa einen Monat;etwa zehn Jahre|
+Was entsteht durch die Drehung der Erde um ihre Achse?|Tag und Nacht|die Jahreszeiten;die Kontinente;die Ozeane|
+Warum gibt es Jahreszeiten?|weil die Erdachse beim Umlauf um die Sonne geneigt ist|weil die Sonne an- und ausgeht;weil der Mond die Erde heizt;weil die Erde stillsteht|
+Was kreist als künstlicher Körper um die Erde?|Satellit|Komet;Stern;Planet||*
+Wofür steht die Abkürzung ISS?|Internationale Raumstation|Innere Sonnenschicht;Insel-Such-System;Internationaler Sportverband|
+Wozu nutzt man Wettersatelliten?|um Wolken und Wetter zu beobachten|um Fische zu füttern;um Berge zu bauen;um Strom zu speichern|
+Welchen Planeten erforschen Fahrzeuge (Rover) besonders intensiv?|Mars|Jupiter;Neptun;Saturn||*
+In welche Richtung dreht sich die Erde?|von West nach Ost|von Ost nach West;von Nord nach Süd;gar nicht|
+`);
+pool5('k5_o_aufbau', 'Denke an eine Schale wie bei einem Pfirsich.', `
+Wie heißt die äußerste feste Schicht der Erde?|Erdkruste|Erdmantel;Erdkern;Atmosphäre||*Kruste
+Welche Schicht liegt unter der Erdkruste?|Erdmantel|äußerer Kern;innerer Kern;Lufthülle||*Mantel
+Was liegt ganz im Inneren der Erde?|Erdkern|Erdkruste;Erdmantel;Ozean||*Kern
+Wie heißt die Lufthülle der Erde?|Atmosphäre|Hydrosphäre;Erdmantel;Galaxie||*
+Warum nennt man die Erde „Blauer Planet“?|weil große Teile mit Wasser bedeckt sind|weil das Gestein blau ist;weil die Sonne blau ist;weil sie kalt ist|
+Was braucht das Leben auf der Erde unbedingt?|Wasser, Luft und Sonnenlicht|Gold und Silber;nur Dunkelheit;Mondgestein|
+Wie alt ist die Erde ungefähr?|4,6 Milliarden Jahre|6000 Jahre;4 Millionen Jahre;100 Milliarden Jahre|
+In welchem Erdzeitalter lebten die Dinosaurier?|Erdmittelalter|Erdneuzeit;Erdurzeit;Eisenzeit|
+Welches Zeitalter ist das jüngste?|Erdneuzeit|Erdaltertum;Erdmittelalter;Erdurzeit|
+`);
+pool5('k5_o_kontinente', 'Stell dir die Weltkarte vor.', `
+Welcher ist der größte Kontinent?|Asien|Afrika;Europa;Australien||*
+Welcher ist der größte Ozean?|Pazifik|Atlantik;Indischer Ozean;Arktischer Ozean||*Pazifischer Ozean;Stiller Ozean
+Welcher Ozean liegt zwischen Europa und Amerika?|Atlantik|Pazifik;Indischer Ozean;Südpazifik||*Atlantischer Ozean
+Auf welchem Kontinent liegt Ägypten?|Afrika|Asien;Europa;Südamerika||*
+Auf welchem Kontinent liegt Brasilien?|Südamerika|Nordamerika;Afrika;Australien||*
+Welcher Kontinent liegt rund um den Südpol?|Antarktika|Arktis;Australien;Asien||*Antarktis
+Welcher ist der kleinste Kontinent?|Australien|Europa;Antarktika;Südamerika||*
+Welches Gebirge trennt Europa im Osten von Asien?|Ural|Alpen;Anden;Himalaya||*
+Warum gibt es Weltkarten mit unterschiedlicher Mitte?|Jede Darstellung wählt eine eigene Sicht, nicht immer Europa.|Die Kontinente wechseln täglich.;Karten dürfen nie Europa zeigen.;Die Erde ist eine Scheibe.|
+Warum verzerrt eine flache Weltkarte?|Eine Kugel lässt sich nicht ohne Verzerrung flach abbilden.|Das Papier ist zu dick.;Die Farben sind falsch.;Weil Karten alt sind.|
+`);
+pool5('k5_o_gradnetz', 'Breitenkreise laufen parallel zum Äquator, Längenhalbkreise von Pol zu Pol.', `
+Wie heißt der längste Breitenkreis?|Äquator|Nullmeridian;Polarkreis;Wendekreis||*
+Wie heißt der Längenhalbkreis durch Greenwich?|Nullmeridian|Äquator;Polarkreis;Datumsgrenze||*
+Wie viel Grad geografischer Breite hat der Äquator?|0°|90°;180°;45°|
+Wie viel Grad Breite hat der Nordpol?|90°|0°;180°;360°|
+Welche Linien verlaufen von Pol zu Pol?|Längenhalbkreise|Breitenkreise;Höhenlinien;Küstenlinien||*Meridiane;Längenkreise
+In welche zwei Hälften teilt der Äquator die Erde?|Nord- und Südhalbkugel|Ost- und Westhalbkugel;Land- und Wasserhälfte;Tag- und Nachthälfte|
+Wozu dient das Gradnetz?|um die Lage jedes Ortes genau anzugeben|um das Wetter zu machen;um Länder zu trennen;um Höhen zu messen|
+Bis zu wie viel Grad zählt die geografische Länge nach Osten oder Westen?|180°|90°;360°;100°|
+`);
+pool5('k5_o_extrem', 'Vergleiche Temperatur und Niederschlag.', `
+Was ist typisch für die Polargebiete?|Kälte und Eis|ständige Hitze;dichter Regenwald;viele Palmen|
+Was ist typisch für Wüsten?|sehr wenig Niederschlag|täglicher Starkregen;dichte Wälder;ewiger Nebel im Wald|
+Wo liegt der tropische Regenwald?|in der Nähe des Äquators|an den Polen;nur im Hochgebirge;in Nordeuropa|
+Welches Tier lebt in der Antarktis?|Pinguin|Eisbär;Kamel;Elefant|Eisbären leben in der Arktis.|*
+Welches Tier lebt in der Arktis wild?|Eisbär|Pinguin;Löwe;Känguru||*
+Wie heißt ein Ort mit Wasser mitten in der Wüste?|Oase|Fjord;Delta;Gletscher||*
+Wo gibt es oft heiße Tage und sehr kalte Nächte?|in Wüsten|im Regenwald;an Meeresküsten;in Städten am See|
+Wie heißen Wälder, in denen es das ganze Jahr warm ist und viel regnet?|tropische Regenwälder|Nadelwälder;Mischwälder;Steppen|
+Wie verändert sich die Temperatur im Hochgebirge mit zunehmender Höhe?|Es wird kälter.|Es wird wärmer.;Es wird feuchtheiß.;Sie bleibt immer gleich.|
+Wie heißt der Tag, an dem im Polargebiet die Sonne nicht untergeht?|Polartag|Polarnacht;Tropentag;Sonntag||*
+`);
+pool5('k5_o_vulkan', 'Kräfte aus dem Erdinneren nennt man endogen.', `
+Wie heißt die Gesteinsschmelze im Erdinneren?|Magma|Lava;Asche;Granit||*
+Wie heißt das Gestein, das flüssig aus dem Vulkan austritt?|Lava|Magma;Sand;Lehm||*
+Wie heißt die Öffnung oben am Vulkan?|Krater|Schlot;Magmakammer;Epizentrum||*
+Wie heißt der Kanal, durch den Magma aufsteigt?|Schlot|Krater;Delta;Fjord||*
+Wie nennt man den Ort an der Oberfläche direkt über dem Erdbebenherd?|Epizentrum|Krater;Äquator;Schlot||*
+Welcher Vulkan liegt in Italien?|Ätna|Fuji;Kilimandscharo;Popocatépetl||*
+Welcher Vulkan liegt in Japan?|Fuji|Ätna;Vesuv;Hekla||*Fujisan
+Welches Faltengebirge liegt in Europa?|Alpen|Anden;Himalaya;Rocky Mountains||*
+Welches hohe Faltengebirge liegt in Asien?|Himalaya|Alpen;Pyrenäen;Anden||*
+Wo treten Vulkane und Erdbeben besonders häufig auf?|an den Grenzen der Erdplatten|überall gleich oft;nur an den Polen;nur in Flusstälern|
+Wie entstehen Faltengebirge?|Erdplatten drücken gegeneinander und schieben Gestein auf.|Regen türmt Sand auf.;Menschen schütten sie auf.;Der Mond zieht Steine hoch.|
+`);
+pool5('k5_o_gestein', 'Gesteine entstehen aus Schmelze, Ablagerung oder Umwandlung.', `
+Wie heißen Gesteine, die aus erstarrtem Magma entstehen?|Erstarrungsgesteine|Ablagerungsgesteine;Umwandlungsgesteine;Fossilien||*Magmatite
+Wie heißen Gesteine aus abgelagertem Material?|Ablagerungsgesteine|Erstarrungsgesteine;Umwandlungsgesteine;Magma||*Sedimentgesteine;Sedimente
+Wie heißen Gesteine, die durch Druck und Hitze verändert wurden?|Umwandlungsgesteine|Ablagerungsgesteine;Erstarrungsgesteine;Kies||*Metamorphite
+Welches ist ein Erstarrungsgestein?|Granit|Sandstein;Marmor;Kalkstein||*
+Welches ist ein Ablagerungsgestein?|Sandstein|Granit;Basalt;Marmor||*
+Welches Umwandlungsgestein entsteht aus Kalkstein?|Marmor|Basalt;Granit;Sandstein||*
+Welches Gestein entsteht aus rasch erstarrter Lava?|Basalt|Marmor;Sandstein;Kalkstein||*
+Wo findet man Versteinerungen am ehesten?|in Ablagerungsgesteinen|in Basalt;in flüssiger Lava;im Erdkern|
+Was beschreibt der Kreislauf der Gesteine?|Gesteine werden immer wieder umgewandelt.|Steine rollen im Kreis.;Steine entstehen nur einmal.;Gesteine wachsen wie Pflanzen.|
+`);
+pool5('k5_o_erosion', 'Kräfte von außen nennt man exogen.', `
+Wie nennt man die Abtragung durch Wasser, Wind oder Eis?|Erosion|Eruption;Rotation;Fotosynthese||*
+Wie nennt man die Zerstörung von Gestein durch Wetter an Ort und Stelle?|Verwitterung|Ablagerung;Eruption;Verdunstung||*
+Was sprengt Gestein, wenn Wasser in Spalten gefriert?|Frostsprengung|Windschliff;Lavafluss;Salzlösung allein||*
+Warum dehnt gefrierendes Wasser Spalten?|Eis braucht mehr Platz als Wasser.|Eis ist heiß.;Eis ist leichter als Luft.;Wasser verschwindet.|
+Welche Landform entsteht durch Wind in der Wüste?|Düne|Fjord;Krater;Delta||*
+Welche Landform entsteht, wo ein Fluss ins Meer mündet und ablagert?|Delta|Düne;Krater;Klamm||*
+Welches Tal graben Flüsse typischerweise ins Gebirge?|Kerbtal (V-Form)|U-Tal;Krater;Becken|
+Welche Talform schaffen Gletscher?|U-förmiges Tal|V-förmiges Tal;Delta;Düne|
+Was schützt den Boden gut vor Abtragung?|Pflanzenbewuchs|nackter Acker am Hang;starker Regen;schwere Maschinen|
+Welche erneuerbare Energie nutzt strömendes Wasser?|Wasserkraft|Kohlekraft;Kernkraft;Erdgas||*
+`);
+pool5('k5_o_mensch', 'Überlege, wie Menschen Flächen nutzen und die Umwelt schonen.', `
+Was ist ein Nutzungskonflikt?|Verschiedene Interessen wollen dieselbe Fläche nutzen.|Zwei Karten sehen gleich aus.;Ein Fluss fließt bergab.;Der Strom ist billig.|
+Welches Beispiel zeigt einen Nutzungskonflikt?|Auf einer Wiese soll gebaut werden, Naturschützer sind dagegen.|Es regnet in der Nacht.;Die Sonne geht auf.;Ein Kind liest ein Buch.|
+Was versiegelt den Boden?|Straßen und Parkplätze|Wiesen;Wälder;Moore|
+Welche Energiequelle ist erneuerbar?|Windkraft|Kohle;Erdöl;Erdgas||*
+Was gehört zur richtigen Mülltrennung?|Papier in die Papiertonne|Batterien in den Biomüll;Glas ins Altpapier;alles in eine Tonne|
+Welcher Einkauf schont die Umwelt eher?|regionales Obst der Jahreszeit|Erdbeeren im Winter aus Übersee;doppelt verpackte Ware;Einweggeschirr|
+Welches Verkehrsmittel spart pro Person meist viel Energie?|Bus und Bahn|Auto mit nur einer Person;Flugzeug;Hubschrauber|
+Wozu dient Landwirtschaft vor allem?|zur Erzeugung von Nahrung|zur Herstellung von Karten;zur Messung der Zeit;zum Bau von Vulkanen|
+Was gehört in die Sammelstelle statt in den Hausmüll?|Batterien|Bananenschalen;Brotreste;Teebeutel||*
+`);
+pool5('k5_o_laender', 'Deutschland besteht aus 16 Bundesländern.', `
+Wie viele Bundesländer hat Deutschland?|16|10;12;20|
+Wie heißt die Hauptstadt Deutschlands?|Berlin|München;Hamburg;Bonn||*
+Wie heißt die Landeshauptstadt von Hessen?|Wiesbaden|Frankfurt;Kassel;Mainz||*
+Wie heißt die Landeshauptstadt von Sachsen?|Dresden|Leipzig;Erfurt;Magdeburg||*
+Wie heißt die Landeshauptstadt von Niedersachsen?|Hannover|Bremen;Braunschweig;Kiel||*
+Wie heißt die Landeshauptstadt von Baden-Württemberg?|Stuttgart|Karlsruhe;Freiburg;Mannheim||*
+Wie heißt die Landeshauptstadt von Nordrhein-Westfalen?|Düsseldorf|Köln;Dortmund;Bonn||*
+Wie heißt die Landeshauptstadt von Rheinland-Pfalz?|Mainz|Koblenz;Trier;Wiesbaden||*
+Wie heißt die Landeshauptstadt von Schleswig-Holstein?|Kiel|Lübeck;Flensburg;Schwerin||*
+Welches Bundesland ist flächenmäßig das größte?|Bayern|Niedersachsen;Hessen;Brandenburg||*
+Welche sind die drei Stadtstaaten?|Berlin, Hamburg und Bremen|München, Köln und Berlin;Hamburg, Kiel und Lübeck;Dresden, Leipzig und Bremen|
+`);
+pool5('k5_o_bayern', 'Bayern hat sieben Regierungsbezirke.', `
+Wie heißt die Landeshauptstadt Bayerns?|München|Nürnberg;Augsburg;Regensburg||*
+Wie viele Regierungsbezirke hat Bayern?|7|5;9;16|
+Welches ist ein Regierungsbezirk Bayerns?|Niederbayern|Allgäu;Chiemgau;Hallertau|
+Wie heißt der höchste Berg Deutschlands?|Zugspitze|Watzmann;Arber;Feldberg||*
+Welcher große Fluss fließt durch Regensburg und Passau?|Donau|Main;Isar;Lech||*
+Welcher Fluss fließt durch München?|Isar|Inn;Lech;Main||*
+Welcher Fluss fließt durch Würzburg?|Main|Donau;Isar;Altmühl||*
+Welcher ist der größte See Bayerns?|Chiemsee|Starnberger See;Ammersee;Tegernsee||*
+In welchem Regierungsbezirk ist Landshut der Sitz der Regierung?|Niederbayern|Oberpfalz;Schwaben;Oberfranken||*
+Welches Mittelgebirge liegt an der Grenze zu Tschechien?|Bayerischer Wald|Spessart;Rhön;Steigerwald|
+Was ist der Sitz der Regierung von Schwaben?|Augsburg|Kempten;Memmingen;Ulm||*
+`);
+pool5('k5_o_natur', 'Von Norden nach Süden wird das Land höher.', `
+Wie heißt die flache Großlandschaft im Norden Deutschlands?|Norddeutsches Tiefland|Mittelgebirge;Alpenvorland;Alpen|
+Welche Großlandschaft liegt ganz im Süden?|Alpen|Tiefland;Mittelgebirge;Küste||*
+Welche Großlandschaft liegt zwischen Donau und Alpen?|Alpenvorland|Norddeutsches Tiefland;Erzgebirge;Eifel||*
+Welches ist ein Mittelgebirge?|Harz|Alpen;Watt;Marsch||*
+An welche Meere grenzt Deutschland?|Nordsee und Ostsee|Mittelmeer und Atlantik;Schwarzes Meer und Nordsee;Ostsee und Adria|
+Wie heißt das Gebiet, das an der Nordsee bei Ebbe trockenfällt?|Watt|Delta;Moor;Fjord||*Wattenmeer
+Wofür eignen sich fruchtbare Lössböden besonders?|für den Ackerbau|für Skigebiete;für Gletscher;für Häfen|
+Wo findet man in Deutschland besonders viel Grünland und Milchwirtschaft?|im Alpenvorland und an der Küste|in Großstädten;auf Berggipfeln;in Industriegebieten|
+Welcher Fluss fließt durch Köln und Düsseldorf?|Rhein|Elbe;Oder;Donau||*
+Welcher Fluss mündet bei Hamburg in Richtung Nordsee?|Elbe|Rhein;Weser;Oder||*
+`);
+pool5('k5_o_nutzung', 'Überlege, was ein Gebiet für Menschen attraktiv oder schützenswert macht.', `
+Wie heißt der erste Nationalpark Deutschlands?|Bayerischer Wald|Berchtesgaden;Harz;Eifel|Er wurde 1970 gegründet.
+Welcher Nationalpark liegt in den bayerischen Alpen?|Berchtesgaden|Hainich;Jasmund;Eifel||*
+Was gilt in einem Nationalpark vor allem?|Die Natur soll sich möglichst ungestört entwickeln.|Überall darf gebaut werden.;Es ist ein Industriegebiet.;Man darf alle Pflanzen mitnehmen.|
+Was ist ein Biosphärenreservat?|eine Modellregion für das Miteinander von Mensch und Natur|ein Raumschiff;ein Freizeitpark mit Achterbahn;ein Bergwerk|
+Was ist ein Geotop?|ein besonderes Zeugnis der Erdgeschichte, z. B. eine Felsformation|eine Wetterstation;ein Computerprogramm;ein Verkehrsschild|
+Welche Gegend ist in Deutschland ein beliebtes Urlaubsziel?|die Ostseeküste|ein Industriehafen;ein Tagebau;ein Autobahnkreuz|
+Was macht ein Gebiet günstig für die Landwirtschaft?|fruchtbarer Boden und mildes Klima|steile Felsen;lange Kälte;Sandwüste|
+Welches Gebiet ist eher ungünstig für den Ackerbau?|steiles Hochgebirge|Lössebene;warmes Flusstal;fruchtbares Becken|
+Was darf man in einem Naturschutzgebiet?|auf den Wegen bleiben und beobachten|Tiere fangen;Feuer machen;Pflanzen ausgraben|
+`);
+pool5('k5_o_stadt', 'Wohnen, arbeiten, einkaufen, lernen, erholen, unterwegs sein.', `
+Wie heißt der alte Kern einer Stadt?|Altstadt|Vorort;Gewerbegebiet;Umland||*
+Was zeigt oft die frühere Grenze einer mittelalterlichen Stadt?|Reste der Stadtmauer|ein Parkhaus;ein Supermarkt;eine Autobahnausfahrt|
+Wie nennt man Menschen, die regelmäßig zur Arbeit in einen anderen Ort fahren?|Pendler|Touristen;Nomaden;Siedler||*
+Wie heißt das Gebiet rund um eine Stadt?|Umland|Altstadt;Zentrum;Fußgängerzone||*
+Welches ist eine Grunddaseinsfunktion?|Wohnen|Würfeln;Winken;Träumen||*
+Wo findet die Funktion „sich versorgen“ statt?|im Supermarkt|auf dem Fußballplatz;im Schlafzimmer;auf der Autobahn|
+Wo findet die Funktion „sich bilden“ vor allem statt?|in Schule und Bücherei|im Parkhaus;in der Tankstelle;auf dem Friedhof|
+Wo findet die Funktion „sich erholen“ statt?|im Park|im Stau;in der Fabrikhalle;im Büro|
+Was ist typisch für ein Gewerbegebiet?|Betriebe und große Hallen|enge mittelalterliche Gassen;nur Bauernhöfe;nur Wohnhäuser|
+Was verbindet Stadt und Umland?|Arbeitswege, Einkauf und Freizeit|gar nichts;nur das Wetter;nur die Postleitzahl|
+`);
+
+/* --- Biologie 5 --- */
+isl5('bio', 'k5b1', 1, 'Biologie, die Wissenschaft von den Lebewesen', 'Forscher-Insel', '🔬', '#5fe3c0', '#0d8f7a', 'b3', [
+  ['k5_b_geraete', 'Labor- und Messgeräte', 'Labor-Lager', '🧪', 'raumeinheiten'],
+  ['k5_b_mikroskop', 'Mikroskop', 'Mikroskop-Mole', '🔬', 'b_sinne'],
+  ['k5_b_methode', 'So forschen wir', 'Forscher-Fjord', '📝', 'b_foto'],
+  ['k5_b_kennzeichen', 'Kennzeichen von Lebewesen', 'Lebens-Lichtung', '🌱', 'b_wurzel']
+]);
+isl5('bio', 'k5b2', 2, 'Bau und Funktion des menschlichen Körpers', 'Körper-Insel', '🫀', '#ff9ab0', '#c43c64', 'b4', [
+  ['k5_b_organe', 'Organe und Organsysteme', 'Organ-Oase', '🫁', 'b_ernaehrung'],
+  ['k5_b_skelett', 'Skelett und Wirbelsäule', 'Knochen-Kamm', '🦴', 'b_skelett'],
+  ['k5_b_bewegung', 'Gelenke, Muskeln und Sehnen', 'Muskel-Mole', '💪', 'b_skelett'],
+  ['k5_b_gesund', 'Gesunder Bewegungsapparat', 'Fitness-Fels', '🏃', 'b_ernaehrung']
+]);
+isl5('bio', 'k5b3', 3, 'Tiere in der Umgebung des Menschen', 'Tier-Insel', '🦔', '#ffb347', '#a85a1c', 'b1', [
+  ['k5_b_wild', 'Wild lebende Säugetiere', 'Wildtier-Wald', '🦊', 'b_saeuger'],
+  ['k5_b_heim', 'Heimtiere', 'Heimtier-Hügel', '🐈', 'b_haustier'],
+  ['k5_b_nutz', 'Nutztiere und Züchtung', 'Hof-Hafen', '🐄', 'b_haustier']
+]);
+isl5('bio', 'k5b4', 4, 'Pflanzen in der Umgebung des Menschen', 'Pflanzen-Insel', '🌾', '#b6f36a', '#3c9d2a', 'b2', [
+  ['k5_b_pflanze', 'Bau der Blütenpflanze', 'Blüten-Bucht', '🌷', 'b_bluete'],
+  ['k5_b_vielfalt', 'Vielfalt der Blütenpflanzen', 'Bunte Wiese', '🌼', 'b_samen'],
+  ['k5_b_getreide', 'Getreide', 'Korn-Kliff', '🌾', 'mal'],
+  ['k5_b_kultur', 'Von der Wild- zur Nutzpflanze', 'Knollen-Küste', '🥔', 'b_wurzel']
+]);
+
+pool5('k5_b_geraete', 'Überlege, wofür man das Gerät braucht.', `
+Womit misst man die Temperatur?|Thermometer|Stoppuhr;Waage;Meterstab||*
+Womit misst man die Zeit?|Stoppuhr|Thermometer;Waage;Lupe||*
+Womit misst man die Masse?|Waage|Meterstab;Stoppuhr;Thermometer||*
+Womit misst man eine Länge?|Meterstab|Waage;Thermometer;Pipette||*Maßband;Lineal;Zollstock
+Wie heißt das schmale Glasröhrchen mit rundem Boden?|Reagenzglas|Petrischale;Erlenmeyerkolben;Becherglas||*
+Wie heißt die flache runde Schale mit Deckel?|Petrischale|Reagenzglas;Trichter;Präparierwanne||*
+Wie heißt das kegelförmige Glasgefäß mit engem Hals?|Erlenmeyerkolben|Petrischale;Reagenzglas;Messzylinder||*
+Wozu dient die Präparierwanne?|als Unterlage beim Zerlegen von Untersuchungsobjekten|zum Messen der Zeit;zum Erhitzen von Wasser;zum Vergrößern|
+Was gehört zum Präparierbesteck?|Pinzette und Präpariernadel|Löffel und Gabel;Hammer und Säge;Zirkel und Geodreieck|
+Wie riechst du im Labor richtig an einem Stoff?|vorsichtig Luft mit der Hand zufächeln|Nase direkt ins Gefäß halten;tief über der Flasche einatmen;gleich probieren|
+`);
+pool5('k5_b_mikroskop', 'Licht geht von unten durch das Präparat nach oben ins Auge.', `
+In welches Teil schaut man hinein?|Okular|Objektiv;Objekttisch;Lampe||*
+Welches Teil sitzt direkt über dem Präparat?|Objektiv|Okular;Fuß;Stativ||*
+Worauf legt man das Präparat?|Objekttisch|Okular;Revolver;Lampe||*
+Wie heißt die dünne Glasplatte, auf die das Objekt kommt?|Objektträger|Deckgläschen;Petrischale;Okular||*
+Was legt man auf den Wassertropfen mit dem Objekt?|Deckgläschen|Objektträger;Filterpapier;Linse am Fuß||*Deckglas
+Womit dreht man ein anderes Objektiv ein?|Objektivrevolver|Feintrieb;Blende;Okular||*Revolver
+Mit welcher Vergrößerung beginnt man?|mit der kleinsten|mit der größten;egal, immer 1000-fach;ohne Objektiv|
+Okular 10-fach und Objektiv 4-fach: Wie stark ist die Gesamtvergrößerung?|40-fach|14-fach;6-fach;400-fach|Beide Werte malnehmen.
+Wozu dient der Feintrieb?|um das Bild genau scharf zu stellen|um das Licht auszuschalten;um das Mikroskop zu tragen;um die Farbe zu ändern|
+Wie trägt man ein Mikroskop?|am Stativ fassen und den Fuß stützen|am Okular;am Kabel;am Objekttisch mit einem Finger|
+`);
+pool5('k5_b_methode', 'Frage, Vermutung, Versuch, Auswertung.', `
+Was steht am Anfang des Forschens?|eine Frage|das Ergebnis;die Note;das Aufräumen||*
+Wie nennt man eine begründete Vermutung?|Hypothese|Protokoll;Ergebnis;Diagramm||*Vermutung
+Was kommt nach der Vermutung?|einen Versuch planen und durchführen|sofort das Ergebnis erfinden;die Frage vergessen;alles wegräumen|
+Was hält man im Protokoll fest?|Frage, Material, Durchführung, Beobachtung und Ergebnis|nur den eigenen Namen;nur die Uhrzeit;nur eine Zeichnung ohne Text|
+Was ist ein Steckbrief?|eine kurze Übersicht wichtiger Merkmale|ein langer Roman;ein Versuchsgerät;eine Rechenaufgabe|
+Was hilft beim Erkennen einer unbekannten Pflanze?|eine Bestimmungshilfe|eine Stoppuhr;eine Waage;ein Fahrplan||*Bestimmungsbuch
+Was ist ein Unterschied zwischen Modell und Original?|Das Modell ist vereinfacht.|Das Modell lebt immer.;Das Original ist aus Plastik.;Es gibt nie Unterschiede.|
+Welche Aussage ist bewertend?|Der Hund ist schön.|Der Hund hat vier Beine.;Der Hund wiegt 12 kg.;Der Hund hat braunes Fell.|
+Welche Aussage ist beschreibend?|Das Blatt ist 6 cm lang.|Das Blatt ist hässlich.;Das ist das beste Blatt.;Das Blatt gefällt mir.|
+Wie gehst du mit lebenden Tieren um?|vorsichtig und schonend|grob schütteln;im verschlossenen Glas in die Sonne stellen;wegwerfen|
+`);
+pool5('k5_b_kennzeichen', 'Nur was alle Kennzeichen zeigt, ist ein Lebewesen.', `
+Welches ist ein Kennzeichen von Lebewesen?|Stoffwechsel|Rosten;Schmelzen;Glänzen||*
+Wie nennt man die Fähigkeit, auf Reize zu reagieren?|Reizbarkeit|Wachstum;Fortpflanzung;Stoffwechsel||*
+Wie nennt man das Erzeugen von Nachkommen?|Fortpflanzung|Reizbarkeit;Atmung;Bewegung||*
+Aus welchen kleinsten Bausteinen bestehen Lebewesen?|Zellen|Organen;Knochen;Sandkörnern||*
+Welches ist KEIN Lebewesen?|ein Kristall|ein Pilz;eine Alge;ein Regenwurm|Kristalle wachsen, haben aber keinen Stoffwechsel und keine Zellen.
+Warum ist ein Auto kein Lebewesen?|Es kann sich nicht selbst fortpflanzen und nicht wachsen.|Es hat keine Farbe.;Es ist zu groß.;Es kann nicht rollen.|
+Die Sonnenblume dreht sich zum Licht. Welches Kennzeichen zeigt das?|Reizbarkeit und Bewegung|Fortpflanzung;Verdauung mit Magen;Sprache|
+Ein Küken wird zum Huhn. Welches Kennzeichen ist das?|Wachstum und Entwicklung|Reizbarkeit;Fotosynthese;Erosion|
+Wie heißt die Wissenschaft von den Lebewesen?|Biologie|Geologie;Physik;Chemie||*
+`);
+pool5('k5_b_organe', 'Mehrere Organe arbeiten in einem Organsystem zusammen.', `
+Wie nennt man einen abgegrenzten Körperteil mit bestimmter Aufgabe?|Organ|Zellkern;Gelenk;System||*
+Welches Organ pumpt das Blut?|Herz|Lunge;Magen;Niere||*
+Welches Organ nimmt Sauerstoff auf?|Lunge|Leber;Magen;Herz||*
+Welches Organ steuert den Körper?|Gehirn|Herz;Darm;Lunge||*
+Zu welchem System gehören Magen und Darm?|Verdauungssystem|Atmungssystem;Nervensystem;Stützapparat|
+Zu welchem System gehören Gehirn und Rückenmark?|Nervensystem|Verdauungssystem;Atmungssystem;Fortpflanzungssystem|
+Zu welchem System gehören Herz und Blutgefäße?|Herz-Kreislauf-System|Nervensystem;Verdauungssystem;Stützapparat|
+Zu welchem System gehören Luftröhre und Bronchien?|Atmungssystem|Ausscheidungssystem;Nervensystem;Verdauungssystem|
+Welches Organ filtert das Blut und bildet Harn?|Niere|Magen;Lunge;Herz||*
+Wo werden die meisten Nährstoffe ins Blut aufgenommen?|im Dünndarm|im Mund;in der Speiseröhre;in der Lunge||*Dünndarm
+Warum arbeiten Organsysteme zusammen?|Jedes hat eigene Aufgaben, gemeinsam halten sie den Körper am Leben.|Jedes macht genau dasselbe.;Sie arbeiten nie gleichzeitig.;Nur eines wird gebraucht.|
+`);
+pool5('k5_b_skelett', 'Das Skelett stützt, schützt und ermöglicht Bewegung.', `
+Welche Knochen schützen Herz und Lunge?|Rippen|Elle und Speiche;Schienbein;Hüfte allein||*
+Welcher Knochen schützt das Gehirn?|Schädel|Brustbein;Becken;Schulterblatt||*
+Wie heißt der längste Knochen?|Oberschenkelknochen|Schienbein;Oberarmknochen;Wirbel||*
+Welche zwei Knochen bilden den Unterarm?|Elle und Speiche|Schienbein und Wadenbein;Rippe und Brustbein;Becken und Wirbel|
+Welche zwei Knochen bilden den Unterschenkel?|Schienbein und Wadenbein|Elle und Speiche;Oberarm und Schlüsselbein;Rippen|
+Welche Form hat die Wirbelsäule von der Seite?|doppelt S-förmig|ganz gerade;kreisförmig;dreieckig|
+Was liegt zwischen den Wirbeln und federt Stöße ab?|Bandscheiben|Sehnen;Rippen;Muskeln allein||*Bandscheibe
+Wozu dient die Wirbelsäule?|Sie stützt den Körper und macht den Rumpf beweglich.|Sie verdaut Nahrung.;Sie pumpt Blut.;Sie filtert Luft.|
+Wie nennt man alle Knochen zusammen?|Skelett|Muskulatur;Nervensystem;Gewebe||*
+`);
+pool5('k5_b_bewegung', 'Muskeln ziehen, sie können nicht drücken.', `
+Was verbindet Muskeln mit Knochen?|Sehnen|Bänder;Nerven;Knorpel||*Sehne
+Was hält Knochen an Gelenken zusammen?|Bänder|Sehnen;Adern;Haare||*
+Wie heißen zwei Muskeln, die entgegengesetzt arbeiten?|Gegenspieler|Mitläufer;Doppelknochen;Gelenke||*Antagonisten
+Welcher Muskel beugt den Arm?|Beuger (Bizeps)|Strecker (Trizeps);Wadenmuskel;Bauchmuskel|
+Welches Gelenk hat die Schulter?|Kugelgelenk|Scharniergelenk;Sattelgelenk;kein Gelenk||*
+Welche Gelenkart ist das Ellenbogengelenk beim Beugen und Strecken?|Scharniergelenk|Kugelgelenk;Sattelgelenk;Drehknochen||*
+Welches Gelenk sitzt am Daumen?|Sattelgelenk|Kugelgelenk wie an der Hüfte;Scharniergelenk wie an einer Tür;keines||*
+Was verringert die Reibung im Gelenk?|Knorpel und Gelenkschmiere|Sand;Haare;Blutgerinnsel|
+Was kann ein Muskel aktiv tun?|sich zusammenziehen|sich selbst schieben;Knochen bilden;Luft holen ohne Rippen|
+`);
+pool5('k5_b_gesund', 'Bewegung, richtige Haltung und passende Belastung halten gesund.', `
+Was stärkt Knochen und Muskeln?|regelmäßige Bewegung|langes Sitzen;wenig Schlaf;nur Süßigkeiten|
+Wie hebt man eine schwere Kiste richtig?|in die Knie gehen und den Rücken gerade halten|mit rundem Rücken;ruckartig mit gestreckten Beinen;mit einer Hand seitlich|
+Wie trägt man den Schulranzen am besten?|auf beiden Schultern, nah am Rücken|nur an einem Gurt;tief über dem Gesäß;in einer Hand vor dem Körper weit weg|
+Welcher Nährstoff-Baustein ist für feste Knochen wichtig?|Calcium|Zucker;Salzsäure;Koffein||*Kalzium
+Was hilft dem Körper, Vitamin D zu bilden?|Sonnenlicht|Dunkelheit;Lärm;Fernsehlicht||*
+Was ist ein Risikofaktor für den Rücken?|stundenlanges krummes Sitzen|Schwimmen;Spazierengehen;Klettern mit Pausen|
+Was tut man vor dem Sport?|sich aufwärmen|sofort sprinten;viel essen;still sitzen||*
+Welche Schuhe sind für Kinderfüße gut?|passende mit genug Platz für die Zehen|zu kleine;hohe Absätze;viel zu große|
+Was ist bei Schmerzen nach einem Sturz richtig?|Bescheid sagen und untersuchen lassen|weiterspielen und verschweigen;fest massieren;das Gelenk verdrehen|
+`);
+pool5('k5_b_wild', 'Lebensweise und Lebensraum passen zusammen.', `
+Welches Säugetier hat Stacheln und hält Winterschlaf?|Igel|Feldhase;Fuchs;Reh||*
+Welches Tier gräbt mit schaufelartigen Vorderfüßen Gänge?|Maulwurf|Eichhörnchen;Reh;Feldhase||*
+Welches Tier legt Vorräte für den Winter an und klettert auf Bäume?|Eichhörnchen|Igel;Maulwurf;Wildschwein||*
+Welches Tier orientiert sich nachts mit Ultraschall?|Fledermaus|Dachs;Reh;Hase||*
+Welches Tier baut Dämme aus Ästen?|Biber|Fischotter;Maus;Marder||*
+Welche Aufgabe hat der buschige Schwanz des Eichhörnchens beim Springen?|steuern und Gleichgewicht halten|Nahrung kauen;Eier tragen;Gänge graben|
+Wie nennt man das männliche Reh?|Rehbock|Ricke;Kitz;Keiler||*Bock
+Wie nennt man das Junge vom Reh?|Kitz|Frischling;Welpe;Fohlen||*Rehkitz
+Wie nennt man junge Wildschweine?|Frischlinge|Kitze;Küken;Kälber||*Frischling
+Warum gibt es Streit um den Biber?|Seine Dämme können Wiesen und Felder überfluten.|Er frisst Fische aus Aquarien.;Er baut Nester auf Dächern.;Er singt nachts.|
+Womit säugen alle Säugetiere ihre Jungen?|mit Milch|mit Insekten;mit Wasser;mit Körnern||*
+`);
+pool5('k5_b_heim', 'Artgerecht heißt: so halten, wie es zur Art passt.', `
+Von welcher Wildform stammt der Hund ab?|Wolf|Fuchs;Schakal allein;Bär||*
+Von welcher Wildform stammt die Hauskatze ab?|Falbkatze|Löwe;Luchs;Tiger||*Wildkatze;Afrikanische Wildkatze
+Wie nennt man das Zähmen und Züchten von Wildtieren über viele Generationen?|Domestizierung|Dressur an einem Tag;Verwitterung;Fotosynthese||*
+Wie jagt die Katze?|Sie schleicht an und springt.|Sie hetzt im Rudel.;Sie baut Netze.;Sie wartet im Wasser.|
+Wie jagt der Wolf?|im Rudel mit Ausdauer|allein aus dem Hinterhalt unter Wasser;mit Netzen;gar nicht|
+Was braucht ein Meerschweinchen zur artgerechten Haltung?|Artgenossen und genug Platz|Einzelhaft im kleinen Karton;nur Süßigkeiten;ständige Dunkelheit|
+Welche Zähne sind beim Hund besonders zum Festhalten?|Eckzähne|Mahlzähne;Nagezähne;Schneidezähne unten allein||*Fangzähne
+Was ist typisch für das Gebiss eines Kaninchens?|nachwachsende Schneidezähne|lange Reißzähne;keine Zähne;nur Giftzähne|
+Was sollte man vor der Anschaffung eines Haustiers bedenken?|Zeit, Platz, Kosten und Verantwortung|nur die Fellfarbe;nur den Namen;gar nichts|
+`);
+pool5('k5_b_nutz', 'Menschen wählen Tiere mit nützlichen Eigenschaften zur Zucht aus.', `
+Von welchem Wildtier stammt das Hausschwein ab?|Wildschwein|Wildschaf;Auerochse;Wildpferd||*
+Von welchem ausgestorbenen Wildrind stammt das Hausrind ab?|Auerochse|Wisent;Büffel;Yak||*Ur
+Wie nennt man ein weibliches Rind, das schon ein Kalb hatte?|Kuh|Stier;Färse;Ochse||*
+Wie nennt man den Magen mit mehreren Abschnitten beim Rind?|Wiederkäuermagen|Kropf;Saugmagen;Muskelmagen mit Steinchen|
+Welches Tier ist ein Wiederkäuer?|Rind|Schwein;Pferd;Huhn||*
+Wozu hält man Hühner vor allem?|für Eier und Fleisch|für Wolle;zum Ziehen von Wagen;für Milch|
+Welches Nutztier liefert Wolle?|Schaf|Schwein;Huhn;Gans||*
+Was bedeutet Züchtung?|gezielte Auswahl der Elterntiere|zufälliges Füttern;Tiere freilassen;Ställe streichen|
+Woran erkennt man artgerechtere Haltung?|Platz, Auslauf und Beschäftigung|enge Käfige;kein Tageslicht;Einzelhaft für Herdentiere|
+`);
+pool5('k5_b_pflanze', 'Wurzel, Sprossachse, Laubblatt und Blüte teilen sich die Arbeit.', `
+Welcher Pflanzenteil nimmt Wasser aus dem Boden auf?|Wurzel|Blüte;Laubblatt;Frucht||*
+Welcher Teil trägt Blätter und Blüten?|Sprossachse|Wurzel;Staubblatt;Samen||*Stängel;Spross
+Wo findet vor allem die Fotosynthese statt?|im Laubblatt|in der Wurzel;im Samen;im Staubbeutel||*Blatt;Laubblatt
+Welcher Teil dient der Fortpflanzung?|Blüte|Wurzel;Stängel;Rinde||*
+Welches ist das männliche Blütenorgan?|Staubblatt|Fruchtblatt;Kelchblatt;Kronblatt||*
+Welches ist das weibliche Blütenorgan?|Fruchtblatt|Staubblatt;Kronblatt;Kelchblatt||*Stempel
+Welche Blätter locken mit Farbe Insekten an?|Kronblätter|Kelchblätter;Laubblätter unten;Keimblätter||*Kronblatt;Blütenblätter
+Wodurch wird das Wasser in der Pflanze transportiert?|durch Leitbündel|durch Blutgefäße;durch Nerven;durch Staubbeutel||*
+Wozu dient die Wurzel außerdem?|Sie verankert die Pflanze im Boden.|Sie lockt Bienen an.;Sie bildet Pollen.;Sie fängt Licht ein.|
+`);
+pool5('k5_b_vielfalt', 'Pflanzenfamilien erkennt man an Blüten und Früchten.', `
+Zu welcher Familie gehört die Erbse?|Schmetterlingsblütler|Korbblütler;Kreuzblütler;Lippenblütler|
+Zu welcher Familie gehört der Raps?|Kreuzblütler|Rosengewächse;Korbblütler;Gräser||*
+Zu welcher Familie gehört das Gänseblümchen?|Korbblütler|Kreuzblütler;Schmetterlingsblütler;Lippenblütler||*
+Zu welcher Familie gehört der Apfelbaum?|Rosengewächse|Nadelgewächse;Kreuzblütler;Gräser||*
+Wie viele Kronblätter hat ein Kreuzblütler?|4|3;5;8|
+Zu welcher Gruppe gehört der Weizen?|Süßgräser|Korbblütler;Rosengewächse;Lippenblütler||*Gräser
+Welche Pflanze ist ein Lippenblütler?|Taubnessel|Löwenzahn;Tulpe;Apfel||*
+Woraus besteht die „Blüte“ des Löwenzahns?|aus vielen kleinen Einzelblüten|aus genau einem Blatt;aus Wurzeln;aus Nadeln|
+Was entsteht nach der Befruchtung aus dem Fruchtknoten?|die Frucht|die Wurzel;das Laubblatt;der Stängel||*Frucht
+`);
+pool5('k5_b_getreide', 'Achte auf Ähre oder Rispe und Grannen.', `
+Welches Getreide ist das wichtigste Brotgetreide bei uns?|Weizen|Mais;Reis;Hirse||*
+Welches Getreide hat Ähren mit sehr langen Grannen und dient oft zum Bierbrauen?|Gerste|Hafer;Weizen;Mais||*
+Welches Getreide trägt eine lockere Rispe?|Hafer|Weizen;Roggen;Gerste||*
+Welches Getreide nutzt man typisch für dunkles Brot?|Roggen|Reis;Mais;Hafer||*
+Welches Getreide bildet große Kolben?|Mais|Roggen;Hafer;Gerste||*
+Welches Getreide wächst oft auf gefluteten Feldern?|Reis|Weizen;Roggen;Hafer||*
+Wie heißen die steifen Borsten an der Ähre?|Grannen|Dornen;Stacheln;Wurzelhaare||*Granne
+Woraus macht man Mehl?|aus den Körnern|aus den Wurzeln;aus den Halmen;aus den Blättern|
+Wovon stammt unser Getreide ab?|von Wildgräsern|von Nadelbäumen;von Pilzen;von Algen||*
+Wofür wird Mais außer als Nahrung oft genutzt?|als Futter und für Biogas|für Fensterglas;für Metall;für Wolle|
+`);
+pool5('k5_b_kultur', 'Züchtung macht aus Wildpflanzen ertragreiche Kulturpflanzen.', `
+Wie heißen Pflanzen, die der Mensch anbaut und züchtet?|Kulturpflanzen|Wildpflanzen;Unkräuter;Algen||*Nutzpflanzen
+Welchen Teil der Kartoffelpflanze essen wir?|die Knolle|die Frucht;die Blüte;das Blatt||*Knolle
+Was ist die Kartoffelknolle?|ein verdickter unterirdischer Spross|eine Frucht;eine Blüte;ein Samen|
+Woher stammt die Kartoffel ursprünglich?|aus Südamerika|aus Australien;aus Nordeuropa;aus Japan|
+Warum sind die grünen Beeren der Kartoffel gefährlich?|Sie sind giftig.|Sie sind zu süß.;Sie haben Dornen.;Sie sind aus Holz.|
+Welcher Käfer schadet der Kartoffel besonders?|Kartoffelkäfer|Marienkäfer;Hirschkäfer;Glühwürmchen||*
+Warum wechselt man jährlich die Frucht auf dem Feld?|um den Boden zu schonen und Schädlinge zu bremsen|damit der Acker bunt aussieht;weil Pflanzen wandern;um weniger Licht zu haben|
+Welche Pflanze liefert Zucker?|Zuckerrübe|Raps;Flachs;Hopfen||*
+Welche Pflanze liefert Öl und Kraftstoff?|Raps|Roggen;Kartoffel;Hopfen||*
+Aus welcher Pflanze gewinnt man Fasern für Leinen?|Flachs|Weizen;Raps;Zuckerrübe||*Lein
+`);
+}
+
 function generate(topic, diff, st) {
   const recent = (st && st.recent && st.recent[topic]) || [];
   let t;
@@ -2814,7 +4190,7 @@ function checkTask(t) {
     if (!(isInt(s.w) && isInt(s.n) && isInt(s.d) && s.d > 0 && s.n > 0 && s.n < s.d && gcd(s.n, s.d) === 1)) errs.push('ungültige gemischte Zahl');
     val = s.w + s.n / s.d;
   } else if (t.type === 'int') {
-    if (!(isInt(s.v) && s.v >= 0 && s.v < 1000000)) errs.push('ungültige Zahl'); val = s.v;
+    if (!(isInt(s.v) && (s.v >= 0 || (t.meta && t.meta.neg)) && Math.abs(s.v) < 1000000)) errs.push('ungültige Zahl'); val = s.v;
   } else if (t.type === 'dec') {
     const p = {n: s.n, k: s.k}; val = dv(s.n, s.k); if (!(isInt(s.n) && s.n >= 0 && s.k >= 0 && s.k <= 4)) errs.push('ungültige Dezimalzahl');
   } else if (t.type === 'fields') {
@@ -3260,7 +4636,7 @@ function worldMap() {
     if (s.playable) {
       const all = TOPICS.filter(x => ST.topics[x.id] && subjOfTopic(x.id) === s.id && gradeOfTopic(x.id) === curGrade()), mast = all.filter(x => mastery(ST, x.id).ok).length;
       h += `<button class="wi" style="left:${q[0]}%;top:${q[1]}%;--c1:${s.c1};--c2:${s.c2}" onclick="flyTo('${s.id}')"><span class="em">${s.emoji}</span><b>${s.name}</b><div class="prog"><i style="width:${Math.round(mast / all.length * 100)}%"></i></div><small>${mast}/${all.length} Orte</small></button>`;
-    } else h += `<div class="wi locked" style="left:${q[0]}%;top:${q[1]}%;--c1:${s.c1};--c2:${s.c2}"><span class="em">🔒</span><b>${s.name}</b><small>Kommt bald</small></div>`;
+    } else h += `<div class="wi locked" style="left:${q[0]}%;top:${q[1]}%;--c1:${s.c1};--c2:${s.c2}"><span class="em">🔒</span><b>${s.name}</b><small>${s.id === 'geschichte' && curGrade() === 5 ? 'Ab Klasse 6' : 'Kommt bald'}</small></div>`;
   });
   if (!gradeReady(curGrade())) h += `<div class="wnote">📭 Für die ${curGrade()}. Klasse sind noch keine Inhalte da. Sie kommen mit einem Update zum neuen Schuljahr.</div>`;
   return h + `<div class="pin" id="pin" style="left:${p[0]}%;top:${p[1]}%"><span class="bigav sm" style="background:${bgCss()}">${leoSvg(false)}</span></div></div>`;
@@ -3747,6 +5123,8 @@ function backupCard() {
 }
 /* ===== Klassenstufen: Inhalte sind pro Klasse getrennt, neue Klassen kommen als Inhalts-Paket ===== */
 LBS.forEach(l => { if (!l.grade) l.grade = 6; });
+Object.keys(G5_ISLAND_IMG).forEach(id => { if (LB_IMG[G5_ISLAND_IMG[id]]) LB_IMG[id] = LB_IMG[G5_ISLAND_IMG[id]]; });
+Object.keys(G5_PLACE_IMG).forEach(id => { if (PL_IMG[G5_PLACE_IMG[id]]) PL_IMG[id] = PL_IMG[G5_PLACE_IMG[id]]; });
 const GRADES = [5, 6, 7, 8, 9, 10];
 const curGrade = () => (GRADES.includes(U().grade) ? U().grade : 6);
 const gradeOfTopic = id => ((LBS.find(l => l.id === lbOf(id)) || {}).grade || 6);
@@ -3853,7 +5231,7 @@ function solHtml(t) {
   switch (t.type) {
     case 'frac': return F(s.n, s.d);
     case 'mixed': return s.w > 0 ? M(s.w, s.n, s.d) : F(s.n, s.d);
-    case 'int': return String(s.v);
+    case 'int': return String(s.v).replace('-', '−');
     case 'dec': return decStr(s.n, s.k);
     case 'fields': return t.fields.map((f, i) => `${f.pre}${s.vals[i]}${f.post}`).join(' ');
     case 'choice': return `<b>${optLabel(s.v)}</b>`;
@@ -3881,6 +5259,7 @@ function render() {
   app.innerHTML = ({start: vStart, hub: vHub, math: vMath, island: vIsland, task: vTask, summary: vSummary, week: vWeek, settings: vSettings, locker: vLocker, profile: vProfile, learn: vLearn, parent: vParent}[view])();
   const f = app.querySelector('#a_w, #a_n, #a_v, #a_x, #a_t, #f_0'); if (f) f.focus();
   app.querySelectorAll('input[inputmode="numeric"]').forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, ''); }));
+  app.querySelectorAll('input[data-neg]').forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/[−–]/g, '-').replace(/[^\d-]/g, '').replace(/(?!^)-/g, ''); }));
   app.querySelectorAll('input[inputmode="decimal"]').forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/[^\d,.]/g, '').replace('.', ','); }));
   if (view === 'hub' && ST.onboarded && !goalAsked && !ST.weekGoals[weekStartKey(today())]) { goalAsked = true; setTimeout(() => { if (view === 'hub' && !$('#overlay').classList.contains('on')) goalModal(); }, 600); }
 }
@@ -4035,10 +5414,10 @@ function vTask() {
     const fin = '<div class="fin"><input id="a_n" inputmode="numeric" maxlength="3" aria-label="Zähler" autocomplete="off"><hr><input id="a_d" inputmode="numeric" maxlength="3" aria-label="Nenner" autocomplete="off"></div>';
     if (t.type === 'frac') ans = fin;
     else if (t.type === 'mixed') ans = `<input id="a_w" class="ans wholein" inputmode="numeric" maxlength="3" placeholder="ganz" aria-label="Ganze Zahl" autocomplete="off">${fin}`;
-    else if (t.type === 'int') ans = `<input id="a_v" class="ans" inputmode="numeric" maxlength="6" aria-label="Antwort" autocomplete="off">`;
+    else if (t.type === 'int') ans = `<input id="a_v" class="ans" ${t.meta && t.meta.neg ? 'data-neg="1" inputmode="text" maxlength="8"' : 'inputmode="numeric" maxlength="6"'} aria-label="Antwort" autocomplete="off">`;
     else if (t.type === 'dec') ans = `<input id="a_x" class="ans" inputmode="decimal" maxlength="10" aria-label="Antwort" autocomplete="off" placeholder="z. B. 3,5">`;
     else if (t.type === 'fields') ans = t.fields.map((f, i) => `<span>${f.pre}</span><input id="f_${i}" class="ans" style="width:96px" inputmode="numeric" maxlength="5" aria-label="Feld ${i + 1}" autocomplete="off"><span>${f.post}</span>`).join('');
-    else if (t.type === 'text') ans = `<input id="a_t" class="ans" style="width:min(520px,100%);text-align:left" type="text" maxlength="80" aria-label="Antwort" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Deine Antwort auf Englisch">`;
+    else if (t.type === 'text') ans = `<input id="a_t" class="ans" style="width:min(520px,100%);text-align:left" type="text" maxlength="80" aria-label="Antwort" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${subjOfTopic(t.topic) === 'englisch' && t.topic !== 'k5_v_britain' ? 'Deine Antwort auf Englisch' : 'Deine Antwort'}">`;
     else if (t.type === 'choice') ans = `<div class="choices">${t.options.map((o, i) => `<button class="choice ${cur.sel === o ? 'sel' : ''}" data-i="${i}" onclick="pickChoice(${i})">${optLabel(o)}</button>`).join('')}</div>`;
     else if (t.type === 'order') ans = `<div class="chips">${t.options.map((o, i) => { const pos = cur.order.indexOf(i); return `<button class="ochip ${pos >= 0 ? 'sel' : ''}" onclick="pickOrder(${i})">${pos >= 0 ? `<em>${pos + 1}</em>` : ''}${o.label ? o.label : F(o.n, o.d)}</button>`; }).join('')}</div>${cur.order.length ? '<div style="margin-top:8px"><button class="btn plain" style="padding:6px 14px;font-size:.9rem" onclick="resetOrder()">Zurücksetzen</button></div>' : ''}`;
   }
