@@ -294,6 +294,19 @@ table.tb th{background:rgba(255,255,255,.12)}
 .crit{position:absolute;top:8px;right:12px;font-weight:900;font-style:italic;color:#ffe12e;text-shadow:0 2px 0 #0b0630;opacity:0}.crit.on{animation:pop .8s forwards}
 .landing{text-align:center}.landing .bus{font-size:4rem;animation:busfly 1.5s ease-in}@keyframes busfly{0%{transform:translate(-120px,-30px)}100%{transform:translate(0,0)}}
 .landmodal{background:linear-gradient(180deg,#59c3ff,#2468d8)}
+/* ---------- Lerncampus-Wiesel (Easteregg) ---------- */
+.wpeek{background:none;border:0;padding:8px;cursor:pointer;line-height:0;border-radius:8px}
+.wpeek img{width:46px;height:auto;opacity:.35;filter:grayscale(1);transition:opacity .25s,filter .25s,transform .25s}
+.wpeek:hover img,.wpeek:focus-visible img{opacity:1;filter:none;transform:translateX(-2px)}
+.poster>.wpeek{position:absolute;right:8px;bottom:6px;z-index:3}
+.whide{display:flex;justify-content:flex-end;margin:14px 0 0}
+.wrun{position:fixed;left:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:150px;z-index:98;pointer-events:none;visibility:hidden;transform:translateX(-170px) scaleX(-1)}
+.wrun.go{visibility:visible;animation:wrun 3.2s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes wrun{0%{transform:translateX(-170px) scaleX(-1)}45%{transform:translateX(42vw) translateY(-4px) scaleX(-1)}55%{transform:translateX(48vw) scaleX(-1)}100%{transform:translateX(calc(100vw + 20px)) scaleX(-1)}}
+.wrun.rtl{left:auto;right:0;transform:translateX(170px)}
+.wrun.rtl.go{animation:wrunrtl 3.2s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes wrunrtl{0%{transform:translateX(170px)}45%{transform:translateX(-42vw) translateY(-4px)}55%{transform:translateX(-48vw)}100%{transform:translateX(calc(-100vw - 20px))}}
+#toast .wt{width:44px;vertical-align:middle;margin-right:10px}
 #toast{position:fixed;left:50%;top:70px;translate:-50% -20px;background:#0b0630;color:#ffe12e;border:3px solid #ffe12e;border-radius:14px;padding:10px 18px;font-weight:900;z-index:99;opacity:0;pointer-events:none;transition:.3s;text-align:center}#toast.on{opacity:1;translate:-50% 0}
 .placebox{margin:6px 0 10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.08)}.placebox.win{background:linear-gradient(135deg,#ffe12e,#ff9d1c);color:#0b0630}.placebox .pl{font-size:1.8rem;font-weight:900;font-style:italic}.pst{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-weight:700}
 .medal{font-size:2.2rem;display:block;text-align:center}.lk.lock .medal{opacity:.5}
@@ -337,6 +350,7 @@ table.tb th{background:rgba(255,255,255,.12)}
 <body>
 <div id="app"></div>
 <div id="overlay"></div>
+<img class="wrun" id="wrun" alt="" aria-hidden="true">
 <script>
 'use strict';
 //#CORE-START
@@ -4659,7 +4673,7 @@ function vStart() {
   const fl = ['lb1', 'e2', 'd2', 'g1', 'lb4', 'e3'].filter(k => typeof LB_IMG !== 'undefined' && LB_IMG[k]);
   return `<main><div class="poster">${fl.map((k, i) => `<span class="pfloat f${i + 1}"><img src="${LB_IMG[k].card}" alt=""></span>`).join('')}
    <div class="pcenter"><div class="bigav posterav" style="background:${bgCss()}">${leoSvg(true)}</div><h1>Lerncampus</h1><p>Lande auf der Insel, sammle Beute und gewinne Minuten.</p>
-   <p style="margin-top:22px"><button class="btn big sun" onclick="enter()">Spiel starten ▶</button></p></div></div></main>`;
+   <p style="margin-top:22px"><button class="btn big sun" onclick="enter()">Spiel starten ▶</button></p></div>${weaselPeek()}</div></main>`;
 }
 
 const isOpen = id => !!(U().unlockAll || (ST.topics[id] && ST.topics[id].unlocked));
@@ -5254,6 +5268,27 @@ function go(v) { view = v; render(); try { window.scrollTo(0, 0); } catch (e) {}
 function topicById(id) { return TOPICS.find(x => x.id === id); }
 function topicName(id) { const t = topicById(id); return t ? t.name : id; }
 
+/* ---------- Lerncampus-Wiesel (Easteregg) ---------- */
+const WIESEL_IMG = 'data:image/png;base64,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';
+const weaselPeek = () => `<button type="button" class="wpeek" onclick="weasel()" title="Wer versteckt sich hier?" aria-label="Verstecktes Wiesel"><img src="${WIESEL_IMG}" alt=""></button>`;
+function weasel(rtl) {
+  const w = document.getElementById('wrun');
+  if (w && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    w.src = WIESEL_IMG; w.classList.remove('go'); w.classList.toggle('rtl', rtl === true); void w.offsetWidth; w.classList.add('go');
+    w.onanimationend = () => w.classList.remove('go');
+  }
+  toast(`<img class="wt" src="${WIESEL_IMG}" alt="">Du hast das Lerncampus-Wiesel gefunden!`);
+  clearTimeout(toast._t); toast._t = setTimeout(() => document.getElementById('toast').classList.remove('on'), 3600);
+}
+let wTyped = '';
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || !e.key || e.key.length !== 1) return;
+  wTyped = (wTyped + e.key.toLowerCase()).slice(-6);
+  if (wTyped === 'wiesel') { wTyped = ''; weasel(true); }
+});
+
 /* ---------- Overlay ---------- */
 function showModal(html, cls) { const o = $('#overlay'); o.innerHTML = `<div class="modal ${cls || ''}" role="dialog" aria-modal="true">${html}</div>`; o.classList.add('on'); const d = o.querySelector('[data-default]'); if (d) d.focus(); }
 function closeModal() { const o = $('#overlay'); o.classList.remove('on'); o.innerHTML = ''; }
@@ -5342,7 +5377,8 @@ function vHub() {
     <div style="margin-top:10px"><button class="btn sun" onclick="go('week')">Zur Wochenübersicht</button></div></section>
    ${eventCard()}${streakCard()}${learnCard()}${seasonCard()}${weeklyCard()}${boardCard()}${feedCard()}${lockerCard()}${profileCard()}
   </div>
-  <h2 class="sectiontitle">🗺️ Weltkarte – wähle deine Insel</h2>${worldMap()}`;
+  <h2 class="sectiontitle">🗺️ Weltkarte – wähle deine Insel</h2>${worldMap()}
+  <div class="whide">${weaselPeek()}</div>`;
   return h;
 }
 
